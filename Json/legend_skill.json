@@ -1,0 +1,22 @@
+{
+    "2 handed slash damage": "4C 50 5F 32 68 5F 73 6C 61 73 68 5F 64 6D 67",
+    "2 handed slash damage (write data to weapon stats)": "4C 50 5F 32 68 5F 73 6C 61 73 68 5F 64 6D 67 5F 73 6B 69 6C 6C",
+    "1 handed slash damage": "4C 50 5F 31 68 5F 73 6C 61 73 68 5F 64 6D 67",
+    "1 handed slash damage (write data to weapon stats)": "4C 50 5F 31 68 5F 73 6C 61 73 68 5F 64 6D 67 5F 73 6B 69 6C 6C",
+    "1 handed blunt damage": "4C 50 5F 31 68 5F 62 6C 75 6E 74 5F 64 6D 67",
+    "1 handed blunt damage (write data to weapon stats)": "4C 50 5F 31 68 5F 62 6C 75 6E 74 5F 64 6D 67 5F 73 6B 69 6C 6C",
+    "2 handed blunt damage": "4C 50 5F 32 68 5F 62 6C 75 6E 74 5F 64 6D 67",
+    "2 handed blunt damage (write data to weapon stats)": "4C 50 5F 32 68 5F 62 6C 75 6E 74 5F 64 6D 67 5F 73 6B 69 6C 6C",
+    "Bow damage": "4C 50 5F 62 6F 77 5F 64 6D 67",
+    "Bow damage (write data to weapon stats)": "4C 50 5F 62 6F 77 5F 64 6D 67 5F 73 6B 69 6C 6C",
+    "Throwables damage": "4C 50 5F 74 68 72 6F 77 61 62 6C 65 73 5F 64 6D 67",
+    "Throwables damage (write data to item stats)": "4C 50 5F 74 68 72 6F 77 61 62 6C 65 73 5F 64 6D 67 5F 73 6B 69 6C 6C",
+    "Crossbow damage": "4C 50 5F 78 62 6F 77 5F 64 6D 67",
+    "Crossbow damage (write data to weapon stats)": "4C 50 5F 78 62 6F 77 5F 64 6D 67 5F 73 6B 69 6C 6C",
+    "Hth_damage": "4C 50 5F 68 74 68 5F 64 6D 67",
+    "Hth_damage (write data to item stats)": "4C 50 5F 68 74 68 5F 64 6D 67 5F 73 6B 69 6C 6C",
+    "Faster pass land recovery": "4C 50 5F 66 61 73 74 65 72 5F 70 61 73 73 5F 6C 61 6E 64 5F 72 65 63 6F 76",
+    "Faster pass land recovery (write data to skill stats)": "4C 50 5F 66 61 73 74 65 72 5F 70 61 73 73 5F 6C 61 6E 64 5F 72 65 63 6F 76 5F 73 6B 69 6C 6C",
+    "Explosive throwables damage": "4C 50 5F 65 78 70 6C 5F 74 68 72 6F 77 61 62 6C 65 73 5F 64 6D 67",
+    "Explosive throwables damage (write data to item stats)": "4C 50 5F 65 78 70 6C 5F 74 68 72 6F 77 61 62 6C 65 73 5F 64 6D 67 5F 73 6B 69 6C 6C"
+}
