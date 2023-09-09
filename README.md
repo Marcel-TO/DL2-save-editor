@@ -8,7 +8,7 @@ hopefully if others enjoy the game they can maybe do something with it.
 
 TO DO...
 
-Break the code in sperate files for easier management.
+Break the code in seperate files for easier management.
 
 Get a new consistent value for backpack or try using a parsing method to just parse the file directly/find patterns and handle each section correctly.
 
