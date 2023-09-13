@@ -1,0 +1,5 @@
+tkinter
+tkinterdnd2
+customtkinter
+asyncio
+shutil
