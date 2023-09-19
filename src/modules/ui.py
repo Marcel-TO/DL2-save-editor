@@ -1,3 +1,5 @@
+import os
+import shutil
 from tkinter import ttk, filedialog, colorchooser, font, messagebox
 from tkinterdnd2 import TkinterDnD, DND_FILES
 import tkinter as tk
@@ -259,6 +261,49 @@ class UserInterface:
         self.notification_label = ttk.Label(self.window, textvariable=self.notification)
         self.notification_label.grid(row=5, column=0, padx=5, pady=5, sticky="w")
 
-def remove_notification(self):
-    self.notification.set("")
-    self.notification_label.configure(textvariable=self.notification)
+        # these are not used in the application itself yet although it may be implemented at some point for some things
+        # it is used for the Close_file dummy function as that's not implemented yet.
+        self.notification = tk.StringVar()
+        self.notification_label = ttk.Label(self.window, textvariable=self.notification)
+        self.notification_label.grid(row=5, column=0, padx=5, pady=5, sticky="w")
+
+    def remove_notification(self):
+        self.notification.set("")
+        self.notification_label.configure(textvariable=self.notification)
+
+    def open_save(self, filepath, backup) -> bool:
+        current_file = filepath
+
+        filepath = filedialog.askopenfilename()
+        if not filepath:
+            messagebox.showerror("Error", "File not selected")
+            return False
+        if current_file is not None and current_file == filepath:
+            messagebox.showerror("Error", "File already open")
+            return False
+
+        self.file_status_label.configure(text=f"Save Opened: {filepath}")
+        self.file_status_label.update()
+
+        if not backup:
+            self.create_backup_dir(filepath)
+
+            backup_dir = os.path.join(os.path.dirname(filepath), "Gamesave_Backup", os.path.basename(filepath))
+            os.makedirs(backup_dir, exist_ok=True)
+            shutil.copy2(filepath, os.path.join(backup_dir, os.path.basename(filepath)))
+
+        return True
+
+    # this isn't working correctly for some reason I need to make
+    # sure the file dialog shows up every time !
+    def create_backup_dir(self, file_name):
+        backup_dir = os.path.join(os.path.dirname(file_name), "Gamesave_Backup", os.path.basename(file_name))
+        if not os.path.exists(backup_dir):
+            os.makedirs(backup_dir)
+    
+    def showError(self, message, exception):
+        messagebox.showerror("Error", str(exception))
+    
+    def askQuestion(self, title, message, icon):
+        response = messagebox.askquestion(title, message,icon=icon)
+        return response

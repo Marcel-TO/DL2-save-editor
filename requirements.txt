@@ -1,5 +1,4 @@
-tkinter
+tk
 tkinterdnd2
 customtkinter
 asyncio
-shutil
