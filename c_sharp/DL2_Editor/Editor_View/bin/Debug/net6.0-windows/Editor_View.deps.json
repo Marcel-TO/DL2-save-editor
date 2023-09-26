@@ -1,0 +1,49 @@
+{
+  "runtimeTarget": {
+    "name": ".NETCoreApp,Version=v6.0",
+    "signature": ""
+  },
+  "compilationOptions": {},
+  "targets": {
+    ".NETCoreApp,Version=v6.0": {
+      "Editor_View/1.0.0": {
+        "dependencies": {
+          "Editor_ViewModel": "1.0.0"
+        },
+        "runtime": {
+          "Editor_View.dll": {}
+        }
+      },
+      "Editor_Model/1.0.0": {
+        "runtime": {
+          "Editor_Model.dll": {}
+        }
+      },
+      "Editor_ViewModel/1.0.0": {
+        "dependencies": {
+          "Editor_Model": "1.0.0"
+        },
+        "runtime": {
+          "Editor_ViewModel.dll": {}
+        }
+      }
+    }
+  },
+  "libraries": {
+    "Editor_View/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "Editor_Model/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "Editor_ViewModel/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    }
+  }
+}

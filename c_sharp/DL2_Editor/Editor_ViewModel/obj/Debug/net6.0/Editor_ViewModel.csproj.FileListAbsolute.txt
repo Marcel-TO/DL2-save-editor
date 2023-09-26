@@ -1,0 +1,15 @@
+M:\Marcel\Desktop\GitHub\DL2-save-editor\c_sharp\DL2_Editor\Editor_ViewModel\bin\Debug\net6.0\Editor_ViewModel.deps.json
+M:\Marcel\Desktop\GitHub\DL2-save-editor\c_sharp\DL2_Editor\Editor_ViewModel\bin\Debug\net6.0\Editor_ViewModel.dll
+M:\Marcel\Desktop\GitHub\DL2-save-editor\c_sharp\DL2_Editor\Editor_ViewModel\bin\Debug\net6.0\Editor_ViewModel.pdb
+M:\Marcel\Desktop\GitHub\DL2-save-editor\c_sharp\DL2_Editor\Editor_ViewModel\obj\Debug\net6.0\Editor_ViewModel.csproj.AssemblyReference.cache
+M:\Marcel\Desktop\GitHub\DL2-save-editor\c_sharp\DL2_Editor\Editor_ViewModel\obj\Debug\net6.0\Editor_ViewModel.GeneratedMSBuildEditorConfig.editorconfig
+M:\Marcel\Desktop\GitHub\DL2-save-editor\c_sharp\DL2_Editor\Editor_ViewModel\obj\Debug\net6.0\Editor_ViewModel.AssemblyInfoInputs.cache
+M:\Marcel\Desktop\GitHub\DL2-save-editor\c_sharp\DL2_Editor\Editor_ViewModel\obj\Debug\net6.0\Editor_ViewModel.AssemblyInfo.cs
+M:\Marcel\Desktop\GitHub\DL2-save-editor\c_sharp\DL2_Editor\Editor_ViewModel\obj\Debug\net6.0\Editor_ViewModel.csproj.CoreCompileInputs.cache
+M:\Marcel\Desktop\GitHub\DL2-save-editor\c_sharp\DL2_Editor\Editor_ViewModel\obj\Debug\net6.0\Editor_ViewModel.dll
+M:\Marcel\Desktop\GitHub\DL2-save-editor\c_sharp\DL2_Editor\Editor_ViewModel\obj\Debug\net6.0\refint\Editor_ViewModel.dll
+M:\Marcel\Desktop\GitHub\DL2-save-editor\c_sharp\DL2_Editor\Editor_ViewModel\obj\Debug\net6.0\Editor_ViewModel.pdb
+M:\Marcel\Desktop\GitHub\DL2-save-editor\c_sharp\DL2_Editor\Editor_ViewModel\obj\Debug\net6.0\ref\Editor_ViewModel.dll
+M:\Marcel\Desktop\GitHub\DL2-save-editor\c_sharp\DL2_Editor\Editor_ViewModel\bin\Debug\net6.0\Editor_Model.dll
+M:\Marcel\Desktop\GitHub\DL2-save-editor\c_sharp\DL2_Editor\Editor_ViewModel\bin\Debug\net6.0\Editor_Model.pdb
+M:\Marcel\Desktop\GitHub\DL2-save-editor\c_sharp\DL2_Editor\Editor_ViewModel\obj\Debug\net6.0\Editor_ViewModel.csproj.CopyComplete
