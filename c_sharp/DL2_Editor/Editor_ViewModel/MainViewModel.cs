@@ -1,15 +1,28 @@
 ﻿namespace Editor_ViewModel
 {
-    using Sudoku_ViewModel;
+    using Editor_ViewModel.Interfaces;
+    using Editor_ViewModel.Languages;
+    using Editor_ViewModel.Logic;
+    using System.Collections.ObjectModel;
     using System.ComponentModel;
     using System.Windows.Input;
 
     public class MainViewModel : INotifyPropertyChanged
     {
+        private string fileContents;
+
+        private ObservableCollection<ILanguageDisplay> supportedLanguages;
+
+        private ILanguageDisplay selectedLanguage;
+
+        private PageNameEnum currentPage;
 
         public MainViewModel()
         {
-            this.FileContents = "Please select a File to see the full hex code. Keep in Mind though, that loading the file could take a while.";
+            this.supportedLanguages = this.CreateSupportedLanguages();
+            this.SelectedLanguage = new EnglishUI();
+            this.IsChangeLanguageSelected = true;
+            this.FileContents = this.SelectedLanguage.NoFileSelected;
 
             this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(this.FileContents)));
         }
@@ -18,8 +31,57 @@
 
         public string FileContents
         {
-            get;
-            set;
+            get
+            {
+                return this.fileContents;
+            }
+            set
+            {
+                if (value == null)
+                {
+                    throw new ArgumentNullException($"The {nameof(this.FileContents)} must not be null!");
+                }
+
+                this.fileContents = value;
+                this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(this.FileContents)));
+            }
+        }
+
+        public ObservableCollection<ILanguageDisplay> SupportedLanguages { get => this.supportedLanguages; }
+
+        public ILanguageDisplay SelectedLanguage
+        {
+            get
+            {
+                return this.selectedLanguage;
+            }
+
+            private set
+            {
+                if (value == null)
+                {
+                    throw new ArgumentNullException($"The {nameof(this.SelectedLanguage)} must not be null!");
+                }
+
+                this.selectedLanguage = value;
+                this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(this.SelectedLanguage)));
+            }
+        }
+
+        public bool IsChangeLanguageSelected { get; set; }
+
+        public PageNameEnum CurrentPage
+        {
+            get
+            {
+                return this.currentPage;
+            }
+
+            private set
+            {
+                this.currentPage = value;
+                this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(this.CurrentPage)));
+            }
         }
 
         /// <summary>
@@ -33,6 +95,44 @@
                 return new GenericCommand(obj =>
                 {
                     Environment.Exit(0);
+                });
+            }
+        }
+
+        public ICommand ChangeLanguageSelction
+        {
+            get
+            {
+                return new GenericCommand(obj =>
+                {
+                    this.IsChangeLanguageSelected = !this.IsChangeLanguageSelected;
+                });
+            }
+        }
+
+        public ICommand SelectingNewLanguge
+        {
+            get
+            {
+                return new GenericCommand(obj =>
+                {
+                    ILanguageDisplay tmp = this.SelectedLanguage;
+                    try
+                    {
+                        tmp = obj as ILanguageDisplay;
+                    }
+                    catch (Exception)
+                    {
+                        Console.WriteLine("Error");
+                    }
+
+                    if (tmp != null)
+                    {
+                        this.SelectedLanguage = tmp;
+                        this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(this.SelectedLanguage)));
+                        this.FileContents = this.SelectedLanguage.NoFileSelected;
+                        this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(this.FileContents)));
+                    }
                 });
             }
         }
@@ -61,6 +161,16 @@
             }
 
             this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(this.FileContents)));
+        }
+
+        private ObservableCollection<ILanguageDisplay> CreateSupportedLanguages()
+        {
+            return new ObservableCollection<ILanguageDisplay>()
+            {
+                new EnglishUI(),
+                new GermanUI(),
+                new SpanishUI()
+            };
         }
     }
 }

@@ -10,11 +10,11 @@ none
 false
 TRACE;DEBUG;NET;NET6_0;NETCOREAPP
 M:\Marcel\Desktop\GitHub\DL2-save-editor\c_sharp\DL2_Editor\Editor_View\App.xaml
-11407045341
+31502816964
 
-3-1233169557
+6-608799200
 196262375040
-MainWindow.xaml;
+MainWindow.xaml;Views\InfoPage.xaml;Views\InventoryPage.xaml;
 
 False
 

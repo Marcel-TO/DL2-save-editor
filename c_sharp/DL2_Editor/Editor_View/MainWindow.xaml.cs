@@ -1,5 +1,6 @@
 ﻿namespace Editor_View
 {
+    using Editor_View.Views;
     using Editor_ViewModel;
     using Microsoft.Win32;
     using System;
@@ -66,6 +67,16 @@
                 string path = openFile.FileName;
                 this.ViewModel.LoadFile(path);
             }
+        }
+
+        private void ChangeToInfoPage(object sender, RoutedEventArgs e)
+        {
+            pageContent.Navigate(new InfoPage(this.DataContext));
+        }
+
+        private void ChangeToInventoryPage(object sender, RoutedEventArgs e)
+        {
+            pageContent.Navigate(new InventoryPage(this.DataContext));
         }
     }
 }

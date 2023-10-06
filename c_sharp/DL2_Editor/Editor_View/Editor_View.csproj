@@ -10,6 +10,9 @@
   <ItemGroup>
     <None Remove="Pictures\Background.jpg" />
     <None Remove="Pictures\icon.png" />
+    <None Remove="Pictures\language.png" />
+    <None Remove="Pictures\linguistics.png" />
+    <None Remove="Pictures\zombie.png" />
   </ItemGroup>
 
   <ItemGroup>
@@ -19,6 +22,8 @@
   <ItemGroup>
     <Resource Include="Pictures\Background.jpg" />
     <Resource Include="Pictures\icon.png" />
+    <Resource Include="Pictures\language.png" />
+    <Resource Include="Pictures\zombie.png" />
   </ItemGroup>
 
 </Project>

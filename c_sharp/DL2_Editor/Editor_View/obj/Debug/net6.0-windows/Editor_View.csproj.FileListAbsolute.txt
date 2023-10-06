@@ -24,3 +24,7 @@ M:\Marcel\Desktop\GitHub\DL2-save-editor\c_sharp\DL2_Editor\Editor_View\bin\Debu
 M:\Marcel\Desktop\GitHub\DL2-save-editor\c_sharp\DL2_Editor\Editor_View\bin\Debug\net6.0-windows\Editor_ViewModel.pdb
 M:\Marcel\Desktop\GitHub\DL2-save-editor\c_sharp\DL2_Editor\Editor_View\bin\Debug\net6.0-windows\Editor_Model.pdb
 M:\Marcel\Desktop\GitHub\DL2-save-editor\c_sharp\DL2_Editor\Editor_View\obj\Debug\net6.0-windows\Editor_View.csproj.CopyComplete
+M:\Marcel\Desktop\GitHub\DL2-save-editor\c_sharp\DL2_Editor\Editor_View\obj\Debug\net6.0-windows\Views\InventoryPage.g.cs
+M:\Marcel\Desktop\GitHub\DL2-save-editor\c_sharp\DL2_Editor\Editor_View\obj\Debug\net6.0-windows\Views\InventoryPage.baml
+M:\Marcel\Desktop\GitHub\DL2-save-editor\c_sharp\DL2_Editor\Editor_View\obj\Debug\net6.0-windows\Views\InfoPage.g.cs
+M:\Marcel\Desktop\GitHub\DL2-save-editor\c_sharp\DL2_Editor\Editor_View\obj\Debug\net6.0-windows\Views\InfoPage.baml

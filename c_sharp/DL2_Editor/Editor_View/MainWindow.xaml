@@ -41,12 +41,55 @@
 
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
                     <Button Width="25" Height="25" Margin="0,0,5,0"
+                            Cursor="Hand"
+                            Foreground="#e9eecd"
+                            BorderBrush="#e9eecd"
+                            Background="Transparent"
+                            Click="ChangeToInfoPage">
+                        <Image Source="Pictures/zombie.png"/>
+
+                        <Button.ToolTip>
+                            <ToolTip Content="Information" />
+                        </Button.ToolTip>
+                    </Button>
+                    
+                    <ToggleButton x:Name="LanguageSelectionPopUp" Width="25" Height="25" Margin="0,0,5,0" Cursor="Hand" Background="Transparent" BorderBrush="#e9eecd">
+                        <Image Source="Pictures/language.png"/>
+
+                        <ToggleButton.ToolTip>
+                            <ToolTip Content="Language Selection" />
+                        </ToggleButton.ToolTip>
+                    </ToggleButton>
+
+                    <Popup x:Name="OpenLanguageSelectionPopUp" IsOpen="{Binding IsChecked, ElementName=LanguageSelectionPopUp}" StaysOpen="False">
+                        <ItemsControl ItemsSource="{Binding SupportedLanguages}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Button Padding="5"
+                                            Cursor="Hand"
+                                            Foreground="#e9eecd"
+                                            BorderBrush="#e9eecd"
+                                            Background="Transparent"
+                                            Content="{Binding LanguageName}" Command="{Binding Path=DataContext.SelectingNewLanguge, RelativeSource={RelativeSource AncestorType=ItemsControl}}" CommandParameter="{Binding}" />
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </Popup>
+
+
+
+
+                    <Button Width="25" Height="25" Margin="0,0,5,0"
                             Content="X"
                             Cursor="Hand"
                             Foreground="#e9eecd"
                             BorderBrush="#e9eecd"
                             Background="Transparent"
-                            Command="{Binding Path=ExitApplicationCommand}"/>
+                            Command="{Binding ExitApplicationCommand}">
+                        <Button.ToolTip>
+                            <ToolTip Content="Exit Application" />
+                        </Button.ToolTip>
+                    </Button>
                 </StackPanel>
             </Grid>
         </Border>
@@ -54,7 +97,7 @@
         <!-- Top Section: 5 Buttons -->
         <StackPanel Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Center" Grid.Row="1" Height="50">
 
-            <Button Content="Skills" Width="100" Cursor="Hand" Click="LoadSaveFile">
+            <Button Content="{Binding SelectedLanguage.SkillLabel}" Width="100" Cursor="Hand" Click="LoadSaveFile">
                 <Button.Style>
                     <Style TargetType="{x:Type Button}">
                         <Setter Property="Background" Value="Transparent" />
@@ -86,7 +129,7 @@
                 </Button.Style>
             </Button>
 
-            <Button Content="Experience" Width="100" Cursor="Hand">
+            <Button Content="{Binding SelectedLanguage.ExperienceLabel}" Width="100" Cursor="Hand">
                 <Button.Style>
                     <Style TargetType="{x:Type Button}">
                         <Setter Property="Background" Value="Transparent" />
@@ -118,7 +161,7 @@
                 </Button.Style>
             </Button>
 
-            <Button Content="Inventory" Width="100" Cursor="Hand">
+            <Button Content="{Binding SelectedLanguage.InventoryLabel}" Width="100" Cursor="Hand" Click="ChangeToInventoryPage">
                 <Button.Style>
                     <Style TargetType="{x:Type Button}">
                         <Setter Property="Background" Value="Transparent" />
@@ -150,7 +193,7 @@
                 </Button.Style>
             </Button>
 
-            <Button Content="Backpack" Width="100" Cursor="Hand">
+            <Button Content="{Binding SelectedLanguage.BackpackLabel}" Width="100" Cursor="Hand">
                 <Button.Style>
                     <Style TargetType="{x:Type Button}">
                         <Setter Property="Background" Value="Transparent" />
@@ -182,7 +225,7 @@
                 </Button.Style>
             </Button>
 
-            <Button Content="IDs" Width="100" Cursor="Hand">
+            <Button Content="{Binding SelectedLanguage.CampaignLabel}" Width="100" Cursor="Hand">
                 <Button.Style>
                     <Style TargetType="{x:Type Button}">
                         <Setter Property="Background" Value="Transparent" />
@@ -214,7 +257,7 @@
                 </Button.Style>
             </Button>
 
-            <Button Content="Campaign" Width="100" Cursor="Hand">
+            <Button Content="{Binding SelectedLanguage.PlayerLabel}" Width="100" Cursor="Hand">
                 <Button.Style>
                     <Style TargetType="{x:Type Button}">
                         <Setter Property="Background" Value="Transparent" />
@@ -248,37 +291,7 @@
 
         </StackPanel>
 
-        <!-- Main Content Section: Left List and Right Text Field -->
-        <Grid Grid.Row="2">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="*"/>
-            </Grid.ColumnDefinitions>
-            
-            <!-- Left Side: List of Items -->
-            <ListView Grid.Column="0" 
-                      Name="itemListView" 
-                      Margin="10" 
-                      Width="Auto" 
-                      Background="Black" 
-                      Opacity="0.5"
-                      BorderBrush="#e9eecd">
-                <!-- Define your ListView's ItemTemplate here -->
-            </ListView>
 
-            <!-- Right Side: Text Field -->            
-            <TextBox 
-                Grid.Column="1" 
-                Name="textField" 
-                Margin="10" 
-                Padding="10"
-                Background="Black" 
-                Opacity="0.5"
-                BorderBrush="#e9eecd"
-                Foreground="#e9eecd"
-                VerticalScrollBarVisibility="Auto"
-                TextWrapping="Wrap"
-                Text="{Binding Path=FileContents}"/>
-        </Grid>
+        <Frame Grid.Row="2" x:Name="pageContent" NavigationUIVisibility="Hidden" />
     </Grid>
 </Window>
