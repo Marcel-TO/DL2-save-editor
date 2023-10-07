@@ -38,27 +38,27 @@ The MVVM (Model-View-ViewModel) programming model is a design pattern used in so
 
 ![mvvm](https://github.com/Marcel-TO/Verse-Interpreter-in-Python/assets/91308057/f1557ed2-ff83-411c-96d0-b36ee214c565)
 
-*Model*:
+**Model**:
 The Model represents the application's data and business logic. It contains classes that define the structure and behavior of the data. The Model is responsible for retrieving, processing, and manipulating data. It does not have any direct knowledge of the user interface.
 
-*View*:
+**View**:
 The View is responsible for presenting the data to the user and handling user interactions. It corresponds to the visual elements of the application, such as windows, pages, controls, and user interface components. In the MVVM pattern, the View is as passive as possible, meaning it should have minimal code related to business logic.
 
-*ViewModel*:
+**ViewModel**:
 The ViewModel acts as an intermediary between the Model and the View. It serves as a data and command provider for the View, translating data from the Model into a format that can be easily displayed in the View. It also handles user input from the View and processes it before passing it on to the Model. The ViewModel encapsulates the application's presentation logic.
 
 
-*Key aspects of the MVVM pattern*:
+**Key aspects of the MVVM pattern**:
 
-*Data Binding*: MVVM relies heavily on data binding mechanisms provided by frameworks like WPF. Data binding establishes a connection between the ViewModel and the View, automatically updating the UI when data changes in the ViewModel and vice versa.
+**Data Binding**: MVVM relies heavily on data binding mechanisms provided by frameworks like WPF. Data binding establishes a connection between the ViewModel and the View, automatically updating the UI when data changes in the ViewModel and vice versa.
 
-*Commands*: MVVM uses commands to handle user interactions. Commands are actions or methods that can be executed in response to user input, such as button clicks or menu selections. ViewModels expose commands that the View can bind to UI elements.
+**Commands**: MVVM uses commands to handle user interactions. Commands are actions or methods that can be executed in response to user input, such as button clicks or menu selections. ViewModels expose commands that the View can bind to UI elements.
 
-*Testability*: MVVM enhances testability by separating the UI logic (ViewModel) from the data (Model) and the actual UI (View). This makes it easier to write unit tests for the ViewModel and the Model, as they can be tested independently of the UI.
+**Testability**: MVVM enhances testability by separating the UI logic (ViewModel) from the data (Model) and the actual UI (View). This makes it easier to write unit tests for the ViewModel and the Model, as they can be tested independently of the UI.
 
-*Flexibility*: MVVM promotes a modular and maintainable code structure, making it easier to update or replace the user interface without affecting the underlying logic. It also supports the development of cross-platform applications.
+**Flexibility**: MVVM promotes a modular and maintainable code structure, making it easier to update or replace the user interface without affecting the underlying logic. It also supports the development of cross-platform applications.
 
-*Scalability*: MVVM can scale to accommodate large and complex applications by breaking them into manageable components. Each View can have its associated ViewModel, and multiple Views can use the same ViewModel.
+**Scalability**: MVVM can scale to accommodate large and complex applications by breaking them into manageable components. Each View can have its associated ViewModel, and multiple Views can use the same ViewModel.
 
 Overall, the MVVM pattern improves the separation of concerns in your application, making it more maintainable, testable, and adaptable to changes in UI design or business logic. It's particularly well-suited for applications where a clean separation of the UI from the application logic is essential.
 
@@ -69,7 +69,7 @@ All general Texts that are specified in the according language interface [ILangu
 For each selectable page, a corresponding view is created in the Views directory. The content of the views don't include the navigation bar or the toolbar at the top. Those are in the main window.
 
 ### Communication between View and ViewModel
-*View to ViewModel*:
+**View to ViewModel**:
 Property binding allows you to bind UI elements in the View (e.g., text boxes, labels) to properties in the ViewModel. When a user interacts with a bound UI element (e.g., enters text into a text box), the value is automatically synchronized with the corresponding property in the ViewModel. This means that changes made in the UI are reflected in the ViewModel, and vice versa, without the need for explicit code to update the UI.
 ```xaml
 <Window x:Class="MyApp.MainWindow"
@@ -84,7 +84,7 @@ Property binding allows you to bind UI elements in the View (e.g., text boxes, l
 </Window>
 ```
 
-*ViewModel to View*:
+**ViewModel to View**:
 Property binding also works in the other direction. When properties in the ViewModel are updated (e.g., data retrieved from a database), the bound UI elements in the View automatically reflect these changes. This seamless synchronization simplifies the process of displaying and updating data in the UI.
 ```csharp
 using System.ComponentModel;
