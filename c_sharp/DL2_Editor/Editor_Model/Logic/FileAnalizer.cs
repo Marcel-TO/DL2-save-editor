@@ -1,9 +1,9 @@
 namespace Editor_Model.Logic
 {
     using System;
-    using Linq;
     using System.Text;
     using System.Collections.Generic;
+    using System.Text.RegularExpressions;
 
     public class FileAnalizer
     {
@@ -72,19 +72,19 @@ namespace Editor_Model.Logic
         private int FindSequenceIndex(byte[] data, byte[] sequence, bool isStart)
         {
             // iterates through the data.
-            for (int i = 0; i < data.length - sequence.length; i++)
+            for (int i = 0; i < data.Length - sequence.Length; i++)
             {   
                 // resets values for each inner iteration.
                 bool isValid = true;
-                lastIndex = 0
+                int lastIndex = 0;
 
                 
 
                 // checks if the sequence starts with the same value as the current data.
-                for (int s = 0; s < sequence.length; s++)
+                for (int s = 0; s < sequence.Length; s++)
                 {
-                    lastIndex = i + s
-                    if (data[lastIndex] != source[s])
+                    lastIndex = i + s;
+                    if (data[lastIndex] != sequence[s])
                     {
                         isValid = false;
                         break;

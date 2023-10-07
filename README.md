@@ -1,38 +1,32 @@
-# DL2-save-editor
-- [DL2-save-editor](#dl2-save-editor)
-  - [Introduction](#introduction)
-  - [To Do's](#to-dos)
-  - [Requirements](#requirements)
+# Welcome to the first Dying Light 2 Editor
+- [Welcome to the first Dying Light 2 Editor](#welcome-to-the-first-dying-light-2-editor)
+  - [Introdcution](#introdcution)
+  - [Structure](#structure)
+  - [Contributers](#contributers)
+
+---
+## Introdcution
+Introducing our work-in-progress application, the first public Dying Light 2 Editor! Developed by a dedicated team of two passionate gamers, our editor empowers you to take control of your Dying Light 2 experience like never before. With this tool, you can manipulate stats and customize items to tailor your in-game adventure to your liking. While not all features are implemented just yet, we're committed to continuously improving and expanding our editor to enhance your gaming journey. Stay tuned for updates and join us in shaping your Dying Light 2 experience!
+## Structure
+Our current project comprises two distinct yet interconnected applications working in synergy. The first application, built in Python, serves as a platform for testing purposes. It fulfills a range of vital functions, from comprehensive testing to parsing and even experimentation with the manipulation of save files. Its versatile capabilities lay the groundwork for the project's core functionality.
+
+Complementing the Python application our second application is being developed using WPF (Windows Presentation Foundation) and C#. This application is the face of our project, focusing entirely on the user interface and ensuring a seamless and intuitive user experience. It acts as the interface through which the results and outcomes of the Python application are implemented and presented to users.
+
+For further information regarding the application, please check out the following [README](./c_sharp/DL2_Editor/README.md).
+
+---
+
+## Contributers
+Currently there are 2 contributers that work hard to increase the experience of Dying Light 2. With the help of Caz`s incredible knowledge of savegamefiles and the coding experience of Marcel, the Editor is not only extremely useful, but has a modern UI with Dying Light 2 themed content.
 
 
-## Introduction
-This so far is a simple editor for dying light 2 PS4.
-
-There is a LOT still be done but its very simply put together for the moment i will work on it in
-my spare time but with work at the moment i just dont have the time to be fully dedicating my time to it.
-
-hopefully if others enjoy the game they can maybe do something with it.
-
-
-## To Do's
-- Break the code in seperate files for easier management.
-- Get a new consistent value for backpack or try using a parsing method to just parse the file directly/find patterns and handle each section correctly.
-- Fix the backup save code so it will backup the save correctly and prompt the user if they wish to overwrite the last backup save. (was working but broke lol ?)
-- Add the customtkinter lib for the buttons and label settings etc. currently it only supports the default tkinter lib.
-- Main block file size is located 2 bytes after the header string (top of file) but changing that doest work so there might be individual block sizes for each block of data.
-- We would need to locate each block size to add/remove items update the block size then update the main file size.
-- Fix the code for the level seeds etc. it reads everything correctly just need to add code to write new values back.
-> This also poses an issue if a user swaps a weapon with another item that is not a weapon, so parsing might be the best option to locate everything correctly. For the parse id in tools you need the inventory folder from the the game itself. `Located in data0.pak/scripts/inventory`
-
-Im sure there is many more things to fix but thats where its at the moment.
-Currently it supports replacing inventory items and editing skills.
-To add support for PC simply use GZIP when opening and writing back to file or use the zlib library.
-
-## Requirements
-To make the use of this editor easier, here is a short chapter regarding the requirements and how to install them.
-Inside the text file [requirements.txt](./requirements.txt) are all modules that need to be installed in order to use this editor.
-
-To install all modules at once please use the following command (either use `pip` or `pip3` depending on your OS):
-```
-    pip install -r ./requirements.txt
-```
+<p>
+  <a href="https://github.com/zCaazual">
+    <img src="https://img.shields.io/badge/Github-zCazual-899994"/>
+  </a>
+</p>
+<p>
+  <a href="https://github.com/Marcel-TO">
+    <img src="https://img.shields.io/badge/Github-Marcel-526264"/>
+  </a>
+</p>
