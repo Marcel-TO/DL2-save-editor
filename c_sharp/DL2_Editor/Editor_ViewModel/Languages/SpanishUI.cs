@@ -27,5 +27,15 @@
         public string EnterNewValueLabel => "Introducir nuevo valor";
 
         public string NoFileSelected => "Seleccione un archivo para ver el código hexadecimal completo. Tenga en cuenta, sin embargo, que la carga del archivo puede tardar un poco.";
+    
+        public string InfoPageTitle => "Hola, amigo peregrino!"
+
+        public string InfoPageIntroductionText 
+        {
+            get
+            {
+                return "To be continued...."
+            }
+        }
     }
 }

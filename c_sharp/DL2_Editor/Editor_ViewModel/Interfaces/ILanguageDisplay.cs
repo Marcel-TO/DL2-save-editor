@@ -27,5 +27,9 @@
         string EnterNewValueLabel { get; }
 
         string NoFileSelected { get; }
+
+        string InfoPageTitle { get; }
+
+        string InfoPageIntroductionText { get; }
     }
 }

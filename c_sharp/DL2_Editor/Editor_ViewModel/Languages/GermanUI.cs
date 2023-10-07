@@ -27,5 +27,15 @@
         public string EnterNewValueLabel => "Gib einen neuen Wert ein";
 
         public string NoFileSelected => "Bitte wählen Sie eine Datei aus, um den vollständigen Hex-Code zu sehen. Beachten Sie jedoch, dass das Laden der Datei eine Weile dauern kann.";
+
+        public string InfoPageTitle => "Hallo, Pilgerfreund!"
+
+        public string InfoPageIntroductionText 
+        {
+            get
+            {
+                return "To be continued...."
+            }
+        }
     }
 }
