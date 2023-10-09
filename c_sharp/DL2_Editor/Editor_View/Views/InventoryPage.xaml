@@ -4,13 +4,18 @@
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
       xmlns:local="clr-namespace:Editor_View.Views"
+      xmlns:vm="clr-namespace:Editor_ViewModel;assembly=Editor_ViewModel"
       mc:Ignorable="d" 
       d:DesignHeight="450" d:DesignWidth="800"
       Title="InventoryPage">
 
+    <Page.DataContext>
+        <vm:MainViewModel/>
+    </Page.DataContext>
+
     <Grid>
         <!-- Main Content Section: Left List and Right Text Field -->
-        <Grid Grid.Row="2">
+        <Grid>
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="*"/>
@@ -19,22 +24,38 @@
 
             <!--Left Side: List of Items-->
 
-            <ListView Grid.Column="0" 
+            <ListView Grid.ColumnSpan="2"
                       Name="itemListView" 
                       Margin="10" 
                       Width="Auto" 
                       Background="Black" 
+                      Foreground="#e9eecd"
                       Opacity="0.5"
-                      BorderBrush="#e9eecd">
-
-                Define your ListView's ItemTemplate here
-
+                      BorderBrush="#e9eecd"
+                      ItemsSource="{Binding SaveFile.Items}">
+                <ListView.View>
+                    <GridView AllowsColumnReorder="true" ColumnHeaderToolTip="Item Information">
+                        <GridViewColumn DisplayMemberBinding="{Binding Name}" Header="Name" Width="250"/>
+                        <GridViewColumn DisplayMemberBinding="{Binding Index}" Header="Index" Width="100"/>
+                        <GridViewColumn DisplayMemberBinding="{Binding SdgString}" Header="SDG Data" Width="400"/>
+                    </GridView>
+                </ListView.View>
+                <ListView.ItemContainerStyle>
+                    <Style TargetType="ListViewItem">
+                        <Style.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Foreground" Value="Black"/>
+                            </Trigger>
+                        </Style.Triggers>
+                    </Style>
+                </ListView.ItemContainerStyle>
             </ListView>
 
 
-            <!--Right Side: Text Field-->
 
-            <TextBox 
+
+            <!--Right Side: Text Field-->
+            <!--<TextBox 
                 Grid.Column="1" 
                 Name="textField" 
                 Margin="10" 
@@ -45,7 +66,8 @@
                 Foreground="#e9eecd"
                 VerticalScrollBarVisibility="Auto"
                 TextWrapping="Wrap"
-                Text="{Binding Path=FileContents}"/>
+                Text="{Binding FileContents,Mode=OneWay}"
+                />-->
         </Grid>
     </Grid>
 </Page>

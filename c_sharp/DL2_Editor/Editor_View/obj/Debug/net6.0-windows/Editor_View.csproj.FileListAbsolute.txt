@@ -28,3 +28,14 @@ M:\Marcel\Desktop\GitHub\DL2-save-editor\c_sharp\DL2_Editor\Editor_View\obj\Debu
 M:\Marcel\Desktop\GitHub\DL2-save-editor\c_sharp\DL2_Editor\Editor_View\obj\Debug\net6.0-windows\Views\InventoryPage.baml
 M:\Marcel\Desktop\GitHub\DL2-save-editor\c_sharp\DL2_Editor\Editor_View\obj\Debug\net6.0-windows\Views\InfoPage.g.cs
 M:\Marcel\Desktop\GitHub\DL2-save-editor\c_sharp\DL2_Editor\Editor_View\obj\Debug\net6.0-windows\Views\InfoPage.baml
+M:\Marcel\Desktop\GitHub\DL2-save-editor\c_sharp\DL2_Editor\Editor_View\obj\Debug\net6.0-windows\Views\CampaignPage.g.cs
+M:\Marcel\Desktop\GitHub\DL2-save-editor\c_sharp\DL2_Editor\Editor_View\obj\Debug\net6.0-windows\Views\ExperiencePage.g.cs
+M:\Marcel\Desktop\GitHub\DL2-save-editor\c_sharp\DL2_Editor\Editor_View\obj\Debug\net6.0-windows\Views\PlayerPage.g.cs
+M:\Marcel\Desktop\GitHub\DL2-save-editor\c_sharp\DL2_Editor\Editor_View\obj\Debug\net6.0-windows\Views\SkillsPage.g.cs
+M:\Marcel\Desktop\GitHub\DL2-save-editor\c_sharp\DL2_Editor\Editor_View\obj\Debug\net6.0-windows\Views\CampaignPage.baml
+M:\Marcel\Desktop\GitHub\DL2-save-editor\c_sharp\DL2_Editor\Editor_View\obj\Debug\net6.0-windows\Views\ExperiencePage.baml
+M:\Marcel\Desktop\GitHub\DL2-save-editor\c_sharp\DL2_Editor\Editor_View\obj\Debug\net6.0-windows\Views\PlayerPage.baml
+M:\Marcel\Desktop\GitHub\DL2-save-editor\c_sharp\DL2_Editor\Editor_View\obj\Debug\net6.0-windows\Views\SkillsPage.baml
+M:\Marcel\Desktop\GitHub\DL2-save-editor\c_sharp\DL2_Editor\Editor_View\bin\Debug\net6.0-windows\Editor_Model.deps.json
+M:\Marcel\Desktop\GitHub\DL2-save-editor\c_sharp\DL2_Editor\Editor_View\bin\Debug\net6.0-windows\Editor_Model.runtimeconfig.json
+M:\Marcel\Desktop\GitHub\DL2-save-editor\c_sharp\DL2_Editor\Editor_View\bin\Debug\net6.0-windows\Editor_Model.exe

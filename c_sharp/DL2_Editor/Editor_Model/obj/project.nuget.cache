@@ -1,11 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "TQsryql7gTQJ3xsx1rt8jN6geIBbU2nLXqKwGQNcgWn9tmOHxG5H+pJvMnJ1rEdB2tNLz6Ub29y+QqBnypLCzw==",
+  "dgSpecHash": "0oC/3XUYQeWCP1vpDV8dB0/PIQwH0l6UVb1T4rGAr8Me39ZoyxHR+juA2wT5XD1s0/AIQTf8GQEeUArAsHkNmg==",
   "success": true,
-  "projectFilePath": "/Users/marcel/Desktop/GitHub/DL2-save-editor/c_sharp/DL2_Editor/Editor_Model/Editor_Model.csproj",
-  "expectedPackageFiles": [
-    "/Users/marcel/.nuget/packages/microsoft.netcore.app.ref/6.0.15/microsoft.netcore.app.ref.6.0.15.nupkg.sha512",
-    "/Users/marcel/.nuget/packages/microsoft.aspnetcore.app.ref/6.0.15/microsoft.aspnetcore.app.ref.6.0.15.nupkg.sha512"
-  ],
+  "projectFilePath": "M:\\Marcel\\Desktop\\GitHub\\DL2-save-editor\\c_sharp\\DL2_Editor\\Editor_Model\\Editor_Model.csproj",
+  "expectedPackageFiles": [],
   "logs": []
 }

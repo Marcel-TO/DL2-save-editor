@@ -1,5 +1,7 @@
 ﻿namespace Editor_ViewModel
 {
+    using Editor_Model.EventArgs;
+    using Editor_Model.Logic;
     using Editor_ViewModel.Interfaces;
     using Editor_ViewModel.Languages;
     using Editor_ViewModel.Logic;
@@ -17,12 +19,19 @@
 
         private PageNameEnum currentPage;
 
+        private FileAnalizerVM fileAnalizer;
+
+        private SaveFile saveFile;
+
         public MainViewModel()
         {
             this.supportedLanguages = this.CreateSupportedLanguages();
             this.SelectedLanguage = new EnglishUI();
             this.IsChangeLanguageSelected = true;
             this.FileContents = this.SelectedLanguage.NoFileSelected;
+            this.FileAnalizer = new FileAnalizerVM();
+            this.FileAnalizer.AnalizedSaveFile += this.OnAnalizedFile;
+            this.FileAnalizer.ErrorMessage += this.OnErrorMessage;
 
             this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(this.FileContents)));
         }
@@ -81,6 +90,43 @@
             {
                 this.currentPage = value;
                 this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(this.CurrentPage)));
+            }
+        }
+
+        public FileAnalizerVM FileAnalizer
+        {
+            get
+            {
+                return this.fileAnalizer;
+            }
+
+            private set
+            {
+                if (value == null)
+                {
+                    throw new ArgumentNullException($"The {nameof(this.FileAnalizer)} must not be null!");
+                }
+
+                this.fileAnalizer = value;
+                this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(this.FileAnalizer)));
+            }
+        }
+
+        public SaveFile SaveFile
+        {
+            get
+            {
+                return this.saveFile;
+            }
+            set
+            {
+                if (value == null)
+                {
+                    throw new ArgumentNullException($"The {nameof(this.SaveFile)} must not be null!");
+                }
+
+                this.saveFile = value;
+                this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(this.SaveFile)));
             }
         }
 
@@ -150,9 +196,9 @@
                     // Read the binary data from the file into the byte array
                     fs.Read(fileContents, 0, (int)fs.Length);
 
-                    // Now, the fileContents byte array contains the binary data from the file
-                    // You can work with the data as needed
-                    this.FileContents = BitConverter.ToString(fileContents).Replace("-", " ");
+                    //// the fileContents byte array contains the binary data from the file
+                    //this.FileContents = BitConverter.ToString(fileContents).Replace("-", " ");
+                    this.FileAnalizer.AnalyzeUnlockableItemsData(fileContents);
                 }
             }
             catch (Exception ex)
@@ -161,6 +207,17 @@
             }
 
             this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(this.FileContents)));
+        }
+
+        protected void OnErrorMessage(object sender, ErrorMessageEventArgs e)
+        {
+            // Send Notification!
+        }
+
+        protected void OnAnalizedFile(object sender, AnalizedSaveFileEventArgs e)
+        {
+            this.SaveFile = e.SaveFile;
+            this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(this.SaveFile.Items)));
         }
 
         private ObservableCollection<ILanguageDisplay> CreateSupportedLanguages()

@@ -4,9 +4,14 @@
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
       xmlns:local="clr-namespace:Editor_View.Views"
+      xmlns:vm="clr-namespace:Editor_ViewModel;assembly=Editor_ViewModel"
       mc:Ignorable="d" 
       d:DesignHeight="450" d:DesignWidth="800"
       Title="InfoPage">
+
+    <Page.DataContext>
+        <vm:MainViewModel/>
+    </Page.DataContext>
 
     <Grid Background="Black" 
                 Opacity="0.5">
@@ -33,6 +38,6 @@
             FontSize="15"
             TextWrapping="Wrap"
             HorizontalAlignment="Center"
-            Text="Welcome to our *Dying Light 2 Save Editor*...... To be continued"/>
+            Text="{Binding SelectedLanguage.InfoPageIntroductionText}"/>
     </Grid>
 </Page>

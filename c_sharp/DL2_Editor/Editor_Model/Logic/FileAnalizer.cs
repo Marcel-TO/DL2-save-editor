@@ -4,10 +4,12 @@ namespace Editor_Model.Logic
     using System.Text;
     using System.Collections.Generic;
     using System.Text.RegularExpressions;
+    using Editor_Model.EventArgs;
+    using Editor_Model.Items;
 
     public class FileAnalizer
     {
-        private static byte[] startSequence = new byte[]
+        private static byte[] startSkills = new byte[]
         {
             0x41, 0x6E, 0x74, 0x69, 0x7A, 0x69, 0x6E, 0x43,
             0x61, 0x70, 0x61, 0x63, 0x69, 0x74, 0x79, 0x55,
@@ -16,7 +18,7 @@ namespace Editor_Model.Logic
             0x69, 0x6C, 0x6C
         };
 
-        private static byte[] endSequence = new byte[]
+        private static byte[] endSkills = new byte[]
         {
             0x50, 0x72, 0x6F, 0x67, 0x72, 0x65, 0x73, 0x73,
             0x69, 0x6F, 0x6E, 0x53, 0x74, 0x61, 0x74, 0x65,
@@ -25,20 +27,35 @@ namespace Editor_Model.Logic
             0x6E
         };
 
- 
+        private static byte[] startInventory = new byte[]
+        {
+            0x54, 0x6F, 0x6B, 0x65, 0x6E, 0x00, 0x00, 0x00,
+            0x00, 0x07, 0x00, 0x55, 0x6E, 0x6B, 0x6E, 0x6F, 0x77, 0x6E
+        };
+
+
         public FileAnalizer()
         {
 
         }
 
-        public byte[] ExtractNecessaryBytes(byte[] data)
+        public event EventHandler<ExtractBytesEventArgs> ExtractBytes;
+
+        public event EventHandler<FoundMatchesEventArgs> FoundMatches;
+
+        public event EventHandler<AnalizedSaveFileEventArgs> AnalizedSaveFile;
+
+        public event EventHandler<ErrorMessageEventArgs> ErrorMessage;
+
+        public void ExtractSkillBytes(byte[] data)
         {
-            int startIndex = this.FindSequenceIndex(data, endSequence, true);
-            int endIndex = this.FindSequenceIndex(data, endSequence, false);
+            int startIndex = this.FindSequenceIndex(data, 0, startSkills, true);
+            int endIndex = this.FindSequenceIndex(data, 0, endSkills, false);
             
             if (startIndex < 0 || endIndex <= 0)
             {
-                return null;
+                this.ExtractBytes?.Invoke(this, new ExtractBytesEventArgs(new byte[0]));
+                return;
             }
 
             byte[] compactData = new byte[endIndex - startIndex];
@@ -47,10 +64,10 @@ namespace Editor_Model.Logic
                 compactData[i - startIndex] = data[i];
             }
 
-            return compactData;
+            this.ExtractBytes?.Invoke(this, new ExtractBytesEventArgs(compactData));
         }
 
-        public string[] ConvertBytesToString(byte[] data)
+        public void FindSkillMatches(byte[] data)
         {
             List<string> matches = new List<string>();
             string stringData = Encoding.UTF8.GetString(data);
@@ -66,19 +83,177 @@ namespace Editor_Model.Logic
                 }
             }
 
-            return matches.ToArray();
+            this.FoundMatches?.Invoke(this, new FoundMatchesEventArgs(matches.ToArray()));
         }
 
-        private int FindSequenceIndex(byte[] data, byte[] sequence, bool isStart)
+        public void AnalyzeUnlockableItemsData(byte[] fileContents)
+        {
+            // Finds all inventory sequences inside the file.
+            int[] indizes = this.FindAllSequences(fileContents, 0, startInventory, true);
+
+            // Checks if the sequence is not valid.
+            if (indizes == null || indizes.Length != 2)
+            {
+                this.ErrorMessage?.Invoke(this, new ErrorMessageEventArgs("Start pattern(s) not found in file."));
+                return;
+            }
+
+            // Takes the second inventory index for needed information.
+            int startIndex = indizes[1];
+            // Compresses the data and only extracts the inventory part of the file.
+            byte[] inventoryData = this.ExtractByteInRange(fileContents, startIndex, fileContents.Length - 1);
+            // Prepares a list of all matching strings.
+            List<int> matchingStringIndizes = new List<int>();
+
+            // Checks for all unlockableitem IDs.
+            // The "_" is important, so that it doesn't include items like "hint_collectable".
+            int[] craftPlanIndizes = this.FindAllSequences(inventoryData, 0, Encoding.UTF8.GetBytes(ItemTypeEnum.Craftplan.ToString() + "_"), false);
+            int[] toolSkinIndizes = this.FindAllSequences(inventoryData, 0, Encoding.UTF8.GetBytes(ItemTypeEnum.ToolSkin.ToString() + "_"), false);
+            int[] collectableIndizes = this.FindAllSequences(inventoryData, 0, Encoding.UTF8.GetBytes(ItemTypeEnum.Collectable.ToString() + "_"), false);
+            matchingStringIndizes.AddRange(craftPlanIndizes);
+            matchingStringIndizes.AddRange(toolSkinIndizes);
+            matchingStringIndizes.AddRange(collectableIndizes);
+
+            if (matchingStringIndizes.Count == 0)
+            {
+                this.ErrorMessage?.Invoke(this, new ErrorMessageEventArgs("No matching strings found."));
+                return;
+            }
+
+            List<BaseItem> items = new List<BaseItem>();
+
+            for (int i = 0; i < matchingStringIndizes.Count; i++)
+            {
+                string cleanString = this.GetFullString(inventoryData, matchingStringIndizes[i]);
+                int currentIndex = matchingStringIndizes[i] + startIndex;
+                int size = Encoding.UTF8.GetBytes(cleanString).Length;
+                // Console.WriteLine($"Index/Offset: {currentIndex}, Size: {size}, String: {cleanString}");
+                byte[] sdg = this.ExtractByteInRange(inventoryData, matchingStringIndizes[i], matchingStringIndizes[i] + size);
+                items.Add(new UnlockableItems(cleanString, currentIndex, size, sdg, BitConverter.ToString(sdg).Replace("-", " ")));
+            }
+
+            // Sort the itemlist, so that the last entry is at the end
+            BaseItem[] sortedItems = items.OrderBy(x => x.Index).ToArray();
+            //Console.WriteLine(BitConverter.ToString(sortedItems[sortedItems.Length - 1].SdgData).Replace("-", " "));
+            //Console.WriteLine($"Summary -> {sortedItems.Length} SDGs where found");
+            
+            BaseItem lastItem = sortedItems[sortedItems.Length - 1];
+
+            // the space between the SDG IDs and chunk data.
+            int jumpOffset = lastItem.Index + lastItem.Size + 75;
+            InventoryChunk[] chunks = this.FindAllInventoryChunks(inventoryData, jumpOffset - startIndex);
+            this.AnalizedSaveFile?.Invoke(this, new AnalizedSaveFileEventArgs(new SaveFile(fileContents, BitConverter.ToString(fileContents).Replace("-", " "), sortedItems, chunks)));
+        }
+
+        /// <summary>
+        /// Represents a method for finding all SDG chunks inside the inventory.
+        /// </summary>
+        /// <param name="content">The content of the current save file.</param>
+        /// <param name="startIndex">The starting index on where the search begins.</param>
+        /// <returns>The array of all found chunks inside the inventory.</returns>
+        public InventoryChunk[] FindAllInventoryChunks(byte[] content, int startIndex)
+        {
+            // Checks if the index is out of range.
+            if (startIndex >= content.Length)
+            {
+                throw new ArgumentOutOfRangeException($"The {nameof(startIndex)} must not greater than the content itself.");
+            }
+
+            List<InventoryChunk> chunks = new List<InventoryChunk>();
+            int index = startIndex;
+
+            // Preparing offsets.
+            int dataOffset = 12;
+            int spaceOffset = 25;
+            int sdgOffset = 4;
+            
+            // Iterates through the content until the parsing is not valid anymore
+            while (true)
+            {
+                // Represents the chunkData and the space to the next SDG.
+                // The data is always the same offset.
+                byte[] chunkData = new byte[] { };
+                byte[] chunkSpace = new byte[] { };
+
+                try
+                {
+                    // Extracts the content
+                    chunkData = this.ExtractByteInRange(content, index, index + dataOffset);
+                    index += dataOffset;
+                    chunkSpace = this.ExtractByteInRange(content, index, index + spaceOffset);
+                    index += spaceOffset;
+
+                    // Checks if after the chunk information follows an SDG -> {0x53, 0x47, 0x44, 0x73}
+                    if (this.FindSequenceIndex(this.ExtractByteInRange(content, index, index + sdgOffset), 0, new byte[] { 0x53, 0x47, 0x44, 0x73 }, true) != -1)
+                    {
+                        // Checks if the content starts with 0x00 and the space as well 0x00, otherwise wrong SDGs would be included.
+                        if (index > 0 && content[index - 1] == 0x00 && chunkSpace[0] == 0x00)
+                        {
+                            //Console.WriteLine($"{chunks.Count + 1}");
+                            //Console.WriteLine(" ");
+                            //Console.WriteLine("12 Bytes After Jump (Hex):");
+                            //Console.WriteLine(BitConverter.ToString(chunkData).Replace("-", " "));
+                            //Console.WriteLine("25 Bytes After 12 Bytes (Hex):");
+                            //Console.WriteLine(BitConverter.ToString(chunkSpace).Replace("-", " "));
+                            //Console.WriteLine(" ");
+                            //Console.WriteLine($"SDGs found! Offset: {index}");
+                            //Console.WriteLine(" ");
+                            //Console.WriteLine("=======================================================================");
+                            chunks.Add(new InventoryChunk(chunkData, chunkSpace));
+                        }
+                    }
+                    else
+                    {
+                        break;
+                    }
+
+                    // After the SDG are 75 space. Due to the SDG length from before, we have to add it to the index.
+                    index += 75 + sdgOffset;
+                }
+                catch (ArgumentOutOfRangeException)
+                {
+                    break;
+                }
+            }
+
+            return chunks.ToArray();
+        }
+
+        /// <summary>
+        /// Represents a method for converting to string and removing unnecessary characters.
+        /// </summary>
+        /// <param name="data">The data from the save file.</param>
+        /// <param name="index">The index of the string.</param>
+        /// <returns>The trimmed string.</returns>
+        private string GetFullString(byte[] data, int index)
+        {
+            for (int i = index; i < data.Length; i++)
+            {
+                if (Encoding.UTF8.GetString(new byte[] { data[i] }) == "\x00")
+                {
+                    return Encoding.UTF8.GetString(this.ExtractByteInRange(data, index, i)).Replace("\x00", "").TrimEnd('\x01');
+                }
+            }
+
+            return Encoding.UTF8.GetString(this.ExtractByteInRange(data, index, data.Length)).Replace("\x00", "").TrimEnd('\x01');
+        }
+
+        /// <summary>
+        /// Represents a method for finding a specific sequence inside an array.
+        /// </summary>
+        /// <param name="data">The data from the save file.</param>
+        /// <param name="startingIndex">The starting index of the iteration.</param>
+        /// <param name="sequence">The wanted sequence.</param>
+        /// <param name="isStart">Indicates whether the sequence is at before or after the searched index.</param>
+        /// <returns>Returns the index of the specific sequence.</returns>
+        private int FindSequenceIndex(byte[] data, int startingIndex, byte[] sequence, bool isStart)
         {
             // iterates through the data.
-            for (int i = 0; i < data.Length - sequence.Length; i++)
+            for (int i = startingIndex; i < data.Length; i++)
             {   
                 // resets values for each inner iteration.
                 bool isValid = true;
                 int lastIndex = 0;
-
-                
 
                 // checks if the sequence starts with the same value as the current data.
                 for (int s = 0; s < sequence.Length; s++)
@@ -104,6 +279,75 @@ namespace Editor_Model.Logic
 
             // returns negative if sequence not found.
             return -1;
-        }   
+        }
+
+        /// <summary>
+        /// Represents a method for finding all sequences inside an byte array.
+        /// </summary>
+        /// <param name="data">The data from a save file.</param>
+        /// <param name="startingIndex">The starting index of the iteration.</param>
+        /// <param name="sequence">The wanted sequence.</param>
+        /// <param name="isStart">Indicates whether the sequence is at before or after the searched index.</param>
+        /// <returns>Returns the indizes for each found sequence.</returns>
+        private int[] FindAllSequences(byte[] data, int startingIndex, byte[] sequence, bool isStart)
+        {
+            List<int> sequences = new List<int>();
+
+            // iterates through the data.
+            for (int i = startingIndex; i < data.Length - sequence.Length; i++)
+            {
+                // resets values for each inner iteration.
+                bool isValid = true;
+                int lastIndex = 0;
+
+                // checks if the sequence starts with the same value as the current data.
+                for (int s = 0; s < sequence.Length; s++)
+                {
+                    lastIndex = i + s;
+                    if (data[lastIndex] != sequence[s])
+                    {
+                        isValid = false;
+                        break;
+                    }
+                }
+
+                // checks if it is the start sequence or the end sequence.
+                if (isValid && isStart)
+                {
+                    sequences.Add(lastIndex + 1);
+                }
+                else if (isValid)
+                {
+                    sequences.Add(i);
+                }
+            }
+
+            // returns negative if sequence not found.
+            return sequences.ToArray();
+        }
+
+        /// <summary>
+        /// Represents a method for extracting a sequence from a byte array.
+        /// </summary>
+        /// <param name="data">The data of the save file.</param>
+        /// <param name="startIndex">The starting index of the data.</param>
+        /// <param name="endIndex">The end index of the data.</param>
+        /// <returns>The data between the start and the end index.</returns>
+        private byte[] ExtractByteInRange(byte[] data, int startIndex, int endIndex)
+        {
+            if (startIndex < 0 || endIndex <= 0 || endIndex > data.Length)
+            {
+                this.ExtractBytes?.Invoke(this, new ExtractBytesEventArgs(new byte[0]));
+                return new byte[0];
+            }
+
+            byte[] compactData = new byte[endIndex - startIndex];
+            for (int i = startIndex; i < endIndex; i++)
+            {
+                compactData[i - startIndex] = data[i];
+            }
+
+            return compactData;
+        }
     }
 }

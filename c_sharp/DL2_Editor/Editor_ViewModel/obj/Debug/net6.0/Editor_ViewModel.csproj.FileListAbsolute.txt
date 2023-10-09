@@ -13,3 +13,6 @@ M:\Marcel\Desktop\GitHub\DL2-save-editor\c_sharp\DL2_Editor\Editor_ViewModel\obj
 M:\Marcel\Desktop\GitHub\DL2-save-editor\c_sharp\DL2_Editor\Editor_ViewModel\bin\Debug\net6.0\Editor_Model.dll
 M:\Marcel\Desktop\GitHub\DL2-save-editor\c_sharp\DL2_Editor\Editor_ViewModel\bin\Debug\net6.0\Editor_Model.pdb
 M:\Marcel\Desktop\GitHub\DL2-save-editor\c_sharp\DL2_Editor\Editor_ViewModel\obj\Debug\net6.0\Editor_ViewModel.csproj.CopyComplete
+M:\Marcel\Desktop\GitHub\DL2-save-editor\c_sharp\DL2_Editor\Editor_ViewModel\bin\Debug\net6.0\Editor_Model.deps.json
+M:\Marcel\Desktop\GitHub\DL2-save-editor\c_sharp\DL2_Editor\Editor_ViewModel\bin\Debug\net6.0\Editor_Model.runtimeconfig.json
+M:\Marcel\Desktop\GitHub\DL2-save-editor\c_sharp\DL2_Editor\Editor_ViewModel\bin\Debug\net6.0\Editor_Model.exe
