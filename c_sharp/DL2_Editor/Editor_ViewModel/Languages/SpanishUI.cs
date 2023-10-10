@@ -34,8 +34,20 @@
         {
             get
             {
-                return "To be continued....";
+                return "Continuará en ....";
             }
         }
+
+        public string UnlockableItemsLabel => "Objeto desbloqueable";
+
+        public string ChunksLabel => "Fragmentos de datos";
+
+        public string FileInformationLabel => "información de archivo";
+
+        public string FileInformationText => "Se selecciona el siguiente archivo:";
+
+        public string FileLabel => "Archivo";
+
+        public string SizeLabel => "Talla";
     }
 }

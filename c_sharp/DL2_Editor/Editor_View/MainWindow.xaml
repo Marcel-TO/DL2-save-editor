@@ -5,293 +5,232 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Editor_View"
         xmlns:vm="clr-namespace:Editor_ViewModel;assembly=Editor_ViewModel"
+        xmlns:logic="clr-namespace:Editor_ViewModel.Logic;assembly=Editor_ViewModel"
         mc:Ignorable="d"
         WindowStyle="None"
         AllowsTransparency="True"
-        ResizeMode="CanResizeWithGrip"
-        Title="Dying Light Editor" Height="800" Width="1000">
+        ResizeMode="CanResize"
+        Title="Dying Light Editor" Height="800" Width="1000" Background="Transparent">
 
     <Window.DataContext>
         <vm:MainViewModel/>
     </Window.DataContext>
 
-    <Grid>
+    <Window.Resources>
+        <Style x:Key="NavbarButtons" TargetType="{x:Type Button}">
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="BorderBrush" Value="#e9eecd" />
+            <Setter Property="BorderThickness" Value="1.5" />
+            <Setter Property="Foreground" Value="#e9eecd"/>
+            <Setter Property="FontSize" Value="15"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type Button}">
+                        <Border x:Name="Border" CornerRadius="5" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background" Value="Black" TargetName="Border" />
+                                <Setter Property="Opacity" Value="0.6"/>
+                                <Setter Property="BorderThickness" Value="2" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </Window.Resources>
 
-        <Grid.RowDefinitions>
-            <RowDefinition Height="30"/>
-            <RowDefinition Height="*"/>
-            <RowDefinition Height="8*"/>
-        </Grid.RowDefinitions>
+    <Grid Background="Transparent">
+        <Grid Background="White" Margin="5"/>
+        <Grid Margin="5">
 
-        <Grid.Background>
-            <ImageBrush ImageSource="Pictures/Background.jpg" Opacity="0.7"/>
-        </Grid.Background>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="30"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="8*"/>
+            </Grid.RowDefinitions>
 
-        <!-- Top Window Border -->
-        <Border Grid.ColumnSpan="2" BorderBrush="#e9eecd" BorderThickness="1"
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="50"/>
+            </Grid.ColumnDefinitions>
+
+            <Grid.Background>
+                <ImageBrush ImageSource="Pictures/Background.jpg" Opacity="0.7"/>
+            </Grid.Background>
+
+            <!-- Top Window Border -->
+            <Border Grid.ColumnSpan="3" BorderBrush="#e9eecd" BorderThickness="1"
                 MouseDown="Border_MouseDown">
-            <Border.Background>
-                <ImageBrush ImageSource="Pictures/Background.jpg" Stretch="UniformToFill" TileMode="FlipY"/>
-            </Border.Background>
-            <Grid HorizontalAlignment="Stretch">
-                <Label Content="Dying Light 2 Editor"
+                <Border.Background>
+                    <ImageBrush ImageSource="Pictures/Background.jpg" Stretch="UniformToFill" TileMode="FlipY"/>
+                </Border.Background>
+                <Grid HorizontalAlignment="Stretch">
+                    <Label Content="Dying Light 2 Editor"
                        FontFamily="MV Boli"
                        Foreground="#e9eecd"
                        FontWeight="SemiBold"/>
 
-                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
-                    <Button Width="25" Height="25" Margin="0,0,5,0"
-                            Cursor="Hand"
-                            Foreground="#e9eecd"
-                            BorderBrush="#e9eecd"
-                            Background="Transparent"
-                            Click="ChangeToInfoPage">
-                        <Image Source="Pictures/zombie.png"/>
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
+                        <!--Information Page Button-->
+                        <Button Width="25" Height="25" Margin="0,0,5,0"
+                                Cursor="Hand"
+                                Foreground="#e9eecd"
+                                BorderBrush="#e9eecd"
+                                Background="Transparent"
+                                Click="ChangeToPage"
+                                Tag="{x:Static logic:PageNameEnum.InfoPage}">
+                            <Image Source="Pictures/zombie.png"/>
 
-                        <Button.ToolTip>
-                            <ToolTip Content="Information" />
-                        </Button.ToolTip>
-                    </Button>
-                    
-                    <ToggleButton x:Name="LanguageSelectionPopUp" Width="25" Height="25" Margin="0,0,5,0" Cursor="Hand" Background="Transparent" BorderBrush="#e9eecd">
-                        <Image Source="Pictures/language.png"/>
+                            <Button.ToolTip>
+                                <ToolTip Content="Information" />
+                            </Button.ToolTip>
+                        </Button>
 
-                        <ToggleButton.ToolTip>
-                            <ToolTip Content="Language Selection" />
-                        </ToggleButton.ToolTip>
-                    </ToggleButton>
+                        <!--Language Button-->
+                        <ToggleButton x:Name="LanguageSelectionPopUp" Width="25" Height="25" Margin="0,0,5,0" Cursor="Hand" Background="Transparent" BorderBrush="#e9eecd">
+                            <Image Source="Pictures/language.png"/>
 
-                    <Popup x:Name="OpenLanguageSelectionPopUp" IsOpen="{Binding IsChecked, ElementName=LanguageSelectionPopUp}" StaysOpen="False">
-                        <ItemsControl ItemsSource="{Binding SupportedLanguages}">
-                            <ItemsControl.ItemTemplate>
-                                <DataTemplate>
-                                    <Button Padding="5"
+                            <ToggleButton.ToolTip>
+                                <ToolTip Content="Language Selection" />
+                            </ToggleButton.ToolTip>
+                        </ToggleButton>
+
+                        <!--Language Selection-->
+                        <Popup x:Name="OpenLanguageSelectionPopUp" IsOpen="{Binding IsChecked, ElementName=LanguageSelectionPopUp}" StaysOpen="False">
+                            <ItemsControl ItemsSource="{Binding SupportedLanguages}">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <Button Padding="5"
                                             Cursor="Hand"
                                             Foreground="#e9eecd"
                                             BorderBrush="#e9eecd"
                                             Background="Transparent"
                                             Content="{Binding LanguageName}" Command="{Binding Path=DataContext.SelectingNewLanguge, RelativeSource={RelativeSource AncestorType=ItemsControl}}" CommandParameter="{Binding}" />
-                                </DataTemplate>
-                            </ItemsControl.ItemTemplate>
-                        </ItemsControl>
-                    </Popup>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </Popup>
 
 
+                        <!--Resize Button-->
+                        <Button Width="25" Height="25" Margin="0,0,5,0"
+                            Cursor="Hand"
+                            Foreground="#e9eecd"
+                            BorderBrush="#e9eecd"
+                            Background="Transparent"
+                            Click="ChangeToNormalViewSize">
+                            <Image Source="Pictures/resize.png"/>
 
+                            <Button.ToolTip>
+                                <ToolTip Content="Resize Window" />
+                            </Button.ToolTip>
+                        </Button>
 
-                    <Button Width="25" Height="25" Margin="0,0,5,0"
+                        <!--Exit Button-->
+                        <Button Width="25" Height="25" Margin="0,0,5,0"
                             Content="X"
                             Cursor="Hand"
                             Foreground="#e9eecd"
                             BorderBrush="#e9eecd"
                             Background="Transparent"
                             Command="{Binding ExitApplicationCommand}">
-                        <Button.ToolTip>
-                            <ToolTip Content="Exit Application" />
-                        </Button.ToolTip>
-                    </Button>
+                            <Button.ToolTip>
+                                <ToolTip Content="Exit Application" />
+                            </Button.ToolTip>
+                        </Button>
+                    </StackPanel>
+                </Grid>
+            </Border>
+
+            <!-- Top Section: 5 Buttons -->
+            <StackPanel Grid.ColumnSpan="4" Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Center" Grid.Row="1" Height="50">
+                <Button Content="{Binding SelectedLanguage.SkillLabel}" Width="100" Cursor="Hand" Click="ChangeToPage" Tag="{x:Static logic:PageNameEnum.SkillPage}" Style="{StaticResource NavbarButtons}"/>
+                <Button Content="{Binding SelectedLanguage.ExperienceLabel}" Width="100" Cursor="Hand" Click="ChangeToPage" Tag="{x:Static logic:PageNameEnum.ExperiencePage}" Style="{StaticResource NavbarButtons}"/>
+                <Button Content="{Binding SelectedLanguage.InventoryLabel}" Width="100" Cursor="Hand" Click="ChangeToPage" Tag="{x:Static logic:PageNameEnum.InventoryPage}" Style="{StaticResource NavbarButtons}"/>
+                <Button Content="{Binding SelectedLanguage.BackpackLabel}" Width="100" Cursor="Hand" Click="ChangeToPage" Tag="{x:Static logic:PageNameEnum.BackpackPage}" Style="{StaticResource NavbarButtons}"/>
+                <Button Content="{Binding SelectedLanguage.CampaignLabel}" Width="100" Cursor="Hand" Click="ChangeToPage" Tag="{x:Static logic:PageNameEnum.CampaignPage}" Style="{StaticResource NavbarButtons}"/>
+                <Button Content="{Binding SelectedLanguage.PlayerLabel}" Width="100" Cursor="Hand" Click="ChangeToPage" Tag="{x:Static logic:PageNameEnum.PlayerPage}" Style="{StaticResource NavbarButtons}"/>
+            </StackPanel>
+
+
+            <!-- File Information Button -->
+            <ToggleButton x:Name="FileInformation" Cursor="Hand" Background="Transparent" BorderBrush="Transparent" Grid.Row="1" Grid.Column="0">
+                <ToggleButton.Style>
+                    <Style TargetType="{x:Type ToggleButton}">
+                        <Setter Property="Background" Value="Transparent" />
+                        <Setter Property="BorderBrush" Value="#e9eecd" />
+                        <Setter Property="BorderThickness" Value="1.5" />
+                        <Setter Property="Foreground" Value="#e9eecd"/>
+                        <Setter Property="FontSize" Value="15"/>
+                        <Setter Property="Template">
+                            <Setter.Value>
+                                <ControlTemplate TargetType="{x:Type ToggleButton}">
+                                    <Border x:Name="Border" CornerRadius="5" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}">
+                                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                    </Border>
+                                    <ControlTemplate.Triggers>
+                                        <Trigger Property="IsMouseOver" Value="True">
+                                            <Setter Property="Background" Value="Black" TargetName="Border" />
+                                            <Setter Property="Opacity" Value="0.6"/>
+                                            <Setter Property="BorderThickness" Value="2" />
+                                        </Trigger>
+                                    </ControlTemplate.Triggers>
+                                </ControlTemplate>
+                            </Setter.Value>
+                        </Setter>
+                    </Style>
+                </ToggleButton.Style>
+                <StackPanel>
+                    <Image Source="Pictures/file.png" Height="30"/>
+                    <TextBlock Text="{Binding SelectedLanguage.FileInformationLabel}" Foreground="#e9eecd"/>
                 </StackPanel>
-            </Grid>
-        </Border>
+                
 
-        <!-- Top Section: 5 Buttons -->
-        <StackPanel Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Center" Grid.Row="1" Height="50">
+                <ToggleButton.ToolTip>
+                    <ToolTip Content="Language Selection" />
+                </ToggleButton.ToolTip>
+            </ToggleButton>
 
-            <Button Content="{Binding SelectedLanguage.SkillLabel}" Width="100" Cursor="Hand" Click="LoadSaveFile">
-                <Button.Style>
-                    <Style TargetType="{x:Type Button}">
-                        <Setter Property="Background" Value="Transparent" />
-                        <Setter Property="BorderBrush" Value="#e9eecd" />
-                        <Setter Property="BorderThickness" Value="1.5" />
-                        <Setter Property="Foreground" Value="#e9eecd"/>
-                        <Setter Property="FontSize" Value="15"/>
-                        <Setter Property="Template">
-                            <Setter.Value>
-                                <ControlTemplate TargetType="{x:Type Button}">
-                                    <Border x:Name="Border" CornerRadius="5" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}">
-                                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
-                                    </Border>
-                                    <ControlTemplate.Triggers>
-                                        <Trigger Property="IsMouseOver" Value="True">
-                                            <Setter Property="Background" Value="Black" TargetName="Border" />
-                                            <Setter Property="Opacity" Value="0.6"/>
-                                            <Setter Property="BorderThickness" Value="2" />
-                                            <!--
-                                            <Setter Property="BorderBrush" Value="#455450" TargetName="Border"/>
-                                            <Setter Property="Foreground" Value="#455450" />
-                                            -->
-                                        </Trigger>
-                                    </ControlTemplate.Triggers>
-                                </ControlTemplate>
-                            </Setter.Value>
-                        </Setter>
-                    </Style>
-                </Button.Style>
-            </Button>
+            <!--File Information-->
+            <Popup x:Name="FileInformationPopUp" IsOpen="{Binding IsChecked, ElementName=FileInformation}" StaysOpen="False" PlacementTarget="{Binding ElementName=FileInformation}">
+                <StackPanel Width="Auto">
+                    <TextBlock Foreground="#e9eecd" Margin="5" Text="{Binding SelectedLanguage.FileInformationText}"/>
+                    <TextBlock Foreground="#e9eecd" Margin="5">
+                        <TextBlock.Text>
+                            <MultiBinding StringFormat=" {0}: {1}">
+                                <Binding Path="SelectedLanguage.FileLabel" />
+                                <Binding Path="SaveFile.Path" />
+                            </MultiBinding>
+                        </TextBlock.Text>
+                    </TextBlock>
+                    <TextBlock Foreground="#e9eecd" Margin="5">
+                        <TextBlock.Text>
+                            <MultiBinding StringFormat=" {0}: {1}">
+                                <Binding Path="SelectedLanguage.SizeLabel" />
+                                <Binding Path="SaveFile.FileData.Length" />
+                            </MultiBinding>
+                        </TextBlock.Text>
+                    </TextBlock>
 
-            <Button Content="{Binding SelectedLanguage.ExperienceLabel}" Width="100" Cursor="Hand">
-                <Button.Style>
-                    <Style TargetType="{x:Type Button}">
-                        <Setter Property="Background" Value="Transparent" />
-                        <Setter Property="BorderBrush" Value="#e9eecd" />
-                        <Setter Property="BorderThickness" Value="1.5" />
-                        <Setter Property="Foreground" Value="#e9eecd"/>
-                        <Setter Property="FontSize" Value="15"/>
-                        <Setter Property="Template">
-                            <Setter.Value>
-                                <ControlTemplate TargetType="{x:Type Button}">
-                                    <Border x:Name="Border" CornerRadius="5" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}">
-                                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
-                                    </Border>
-                                    <ControlTemplate.Triggers>
-                                        <Trigger Property="IsMouseOver" Value="True">
-                                            <Setter Property="Background" Value="Black" TargetName="Border" />
-                                            <Setter Property="Opacity" Value="0.6"/>
-                                            <Setter Property="BorderThickness" Value="2" />
-                                            <!--
-                                            <Setter Property="BorderBrush" Value="#455450" TargetName="Border"/>
-                                            <Setter Property="Foreground" Value="#455450" />
-                                            -->
-                                        </Trigger>
-                                    </ControlTemplate.Triggers>
-                                </ControlTemplate>
-                            </Setter.Value>
-                        </Setter>
-                    </Style>
-                </Button.Style>
-            </Button>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
 
-            <Button Content="{Binding SelectedLanguage.InventoryLabel}" Width="100" Cursor="Hand" Click="ChangeToInventoryPage">
-                <Button.Style>
-                    <Style TargetType="{x:Type Button}">
-                        <Setter Property="Background" Value="Transparent" />
-                        <Setter Property="BorderBrush" Value="#e9eecd" />
-                        <Setter Property="BorderThickness" Value="1.5" />
-                        <Setter Property="Foreground" Value="#e9eecd"/>
-                        <Setter Property="FontSize" Value="15"/>
-                        <Setter Property="Template">
-                            <Setter.Value>
-                                <ControlTemplate TargetType="{x:Type Button}">
-                                    <Border x:Name="Border" CornerRadius="5" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}">
-                                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
-                                    </Border>
-                                    <ControlTemplate.Triggers>
-                                        <Trigger Property="IsMouseOver" Value="True">
-                                            <Setter Property="Background" Value="Black" TargetName="Border" />
-                                            <Setter Property="Opacity" Value="0.6"/>
-                                            <Setter Property="BorderThickness" Value="2" />
-                                            <!--
-                                            <Setter Property="BorderBrush" Value="#455450" TargetName="Border"/>
-                                            <Setter Property="Foreground" Value="#455450" />
-                                            -->
-                                        </Trigger>
-                                    </ControlTemplate.Triggers>
-                                </ControlTemplate>
-                            </Setter.Value>
-                        </Setter>
-                    </Style>
-                </Button.Style>
-            </Button>
-
-            <Button Content="{Binding SelectedLanguage.BackpackLabel}" Width="100" Cursor="Hand">
-                <Button.Style>
-                    <Style TargetType="{x:Type Button}">
-                        <Setter Property="Background" Value="Transparent" />
-                        <Setter Property="BorderBrush" Value="#e9eecd" />
-                        <Setter Property="BorderThickness" Value="1.5" />
-                        <Setter Property="Foreground" Value="#e9eecd"/>
-                        <Setter Property="FontSize" Value="15"/>
-                        <Setter Property="Template">
-                            <Setter.Value>
-                                <ControlTemplate TargetType="{x:Type Button}">
-                                    <Border x:Name="Border" CornerRadius="5" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}">
-                                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
-                                    </Border>
-                                    <ControlTemplate.Triggers>
-                                        <Trigger Property="IsMouseOver" Value="True">
-                                            <Setter Property="Background" Value="Black" TargetName="Border" />
-                                            <Setter Property="Opacity" Value="0.6"/>
-                                            <Setter Property="BorderThickness" Value="2" />
-                                            <!--
-                                            <Setter Property="BorderBrush" Value="#455450" TargetName="Border"/>
-                                            <Setter Property="Foreground" Value="#455450" />
-                                            -->
-                                        </Trigger>
-                                    </ControlTemplate.Triggers>
-                                </ControlTemplate>
-                            </Setter.Value>
-                        </Setter>
-                    </Style>
-                </Button.Style>
-            </Button>
-
-            <Button Content="{Binding SelectedLanguage.CampaignLabel}" Width="100" Cursor="Hand">
-                <Button.Style>
-                    <Style TargetType="{x:Type Button}">
-                        <Setter Property="Background" Value="Transparent" />
-                        <Setter Property="BorderBrush" Value="#e9eecd" />
-                        <Setter Property="BorderThickness" Value="1.5" />
-                        <Setter Property="Foreground" Value="#e9eecd"/>
-                        <Setter Property="FontSize" Value="15"/>
-                        <Setter Property="Template">
-                            <Setter.Value>
-                                <ControlTemplate TargetType="{x:Type Button}">
-                                    <Border x:Name="Border" CornerRadius="5" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}">
-                                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
-                                    </Border>
-                                    <ControlTemplate.Triggers>
-                                        <Trigger Property="IsMouseOver" Value="True">
-                                            <Setter Property="Background" Value="Black" TargetName="Border" />
-                                            <Setter Property="Opacity" Value="0.6"/>
-                                            <Setter Property="BorderThickness" Value="2" />
-                                            <!--
-                                            <Setter Property="BorderBrush" Value="#455450" TargetName="Border"/>
-                                            <Setter Property="Foreground" Value="#455450" />
-                                            -->
-                                        </Trigger>
-                                    </ControlTemplate.Triggers>
-                                </ControlTemplate>
-                            </Setter.Value>
-                        </Setter>
-                    </Style>
-                </Button.Style>
-            </Button>
-
-            <Button Content="{Binding SelectedLanguage.PlayerLabel}" Width="100" Cursor="Hand">
-                <Button.Style>
-                    <Style TargetType="{x:Type Button}">
-                        <Setter Property="Background" Value="Transparent" />
-                        <Setter Property="BorderBrush" Value="#e9eecd" />
-                        <Setter Property="BorderThickness" Value="1.5" />
-                        <Setter Property="Foreground" Value="#e9eecd"/>
-                        <Setter Property="FontSize" Value="15"/>
-                        <Setter Property="Template">
-                            <Setter.Value>
-                                <ControlTemplate TargetType="{x:Type Button}">
-                                    <Border x:Name="Border" CornerRadius="5" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}">
-                                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
-                                    </Border>
-                                    <ControlTemplate.Triggers>
-                                        <Trigger Property="IsMouseOver" Value="True">
-                                            <Setter Property="Background" Value="Black" TargetName="Border" />
-                                            <Setter Property="Opacity" Value="0.6"/>
-                                            <Setter Property="BorderThickness" Value="2" />
-                                            <!--
-                                            <Setter Property="BorderBrush" Value="#455450" TargetName="Border"/>
-                                            <Setter Property="Foreground" Value="#455450" />
-                                            -->
-                                        </Trigger>
-                                    </ControlTemplate.Triggers>
-                                </ControlTemplate>
-                            </Setter.Value>
-                        </Setter>
-                    </Style>
-                </Button.Style>
-            </Button>
-
-        </StackPanel>
+                        <Button Grid.Column="0" Click="LoadSaveFile" Style="{StaticResource NavbarButtons}" Content="Open File" Padding="5" Margin="5" Cursor="Hand" HorizontalAlignment="Stretch"/>
+                        <Button Grid.Column="1" Command="{Binding ResetCurrentSaveFile}" Style="{StaticResource NavbarButtons}" Content="Reset" Padding="5" Margin="5" Cursor="Hand" HorizontalAlignment="Stretch"/>
+                    </Grid>
+                </StackPanel>
+            </Popup>
 
 
-        <Frame Grid.Row="2" x:Name="pageContent" NavigationUIVisibility="Hidden" />
+
+            <Frame Grid.Row="2" Grid.ColumnSpan="3" x:Name="pageContent" NavigationUIVisibility="Hidden" />
+        </Grid>
     </Grid>
 </Window>

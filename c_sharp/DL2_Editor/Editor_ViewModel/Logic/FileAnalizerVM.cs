@@ -13,15 +13,16 @@
             this.fileAnalizer = new FileAnalizer();
             this.fileAnalizer.ErrorMessage += this.OnErrorMessage;
             this.fileAnalizer.AnalizedSaveFile += this.OnAnalizedSaveFile;
+            this.fileAnalizer.ReadFile += this.ReadFile;
         }
 
         public event EventHandler<AnalizedSaveFileEventArgs> AnalizedSaveFile;
 
         public event EventHandler<ErrorMessageEventArgs> ErrorMessage;
 
-        public void AnalyzeUnlockableItemsData(byte[] data)
+        public void ReadSaveFile(string filePath)
         {
-            this.fileAnalizer.AnalyzeUnlockableItemsData(data);
+            this.fileAnalizer.ReadFileContent(filePath);
         }
 
         protected void OnErrorMessage(object sender, ErrorMessageEventArgs e)
@@ -34,5 +35,9 @@
             this.AnalizedSaveFile?.Invoke(this, e);
         }
 
+        protected void ReadFile(object sender, ReadFileEventArgs e)
+        {
+            this.fileAnalizer.LoadSaveFile(e.FilePath, e.Data);
+        }
     }
 }

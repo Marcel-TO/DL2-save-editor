@@ -2,6 +2,7 @@
 {
     using Editor_View.Views;
     using Editor_ViewModel;
+    using Editor_ViewModel.Logic;
     using Microsoft.Win32;
     using System;
     using System.Collections.Generic;
@@ -69,14 +70,61 @@
             }
         }
 
-        private void ChangeToInfoPage(object sender, RoutedEventArgs e)
+        private void ChangeToPage(object sender, RoutedEventArgs e)
         {
-            pageContent.Navigate(new InfoPage(this.DataContext));
+            if (sender is Button button && button.Tag is PageNameEnum enumValue)
+            {
+                switch (enumValue)
+                {
+                    case PageNameEnum.InfoPage:
+                        pageContent.Navigate(new InfoPage(this.DataContext));
+                        break;
+                    case PageNameEnum.SkillPage:
+                        pageContent.Navigate(new SkillsPage(this.DataContext));
+                        break;
+                    case PageNameEnum.ExperiencePage:
+                        pageContent.Navigate(new ExperiencePage(this.DataContext));
+                        break;
+                    case PageNameEnum.InventoryPage:
+                        pageContent.Navigate(new InventoryPage(this.DataContext));
+                        break;
+                    case PageNameEnum.BackpackPage:
+                        pageContent.Navigate(new BackpackPage(this.DataContext));
+                        break;
+                    case PageNameEnum.CampaignPage:
+                        pageContent.Navigate(new CampaignPage(this.DataContext));
+                        break;
+                    case PageNameEnum.PlayerPage:
+                        pageContent.Navigate(new PlayerPage(this.DataContext));
+                        break;
+                }
+                
+            }
+            
         }
 
         private void ChangeToInventoryPage(object sender, RoutedEventArgs e)
         {
             pageContent.Navigate(new InventoryPage(this.DataContext));
+        }
+
+        private void ChangeToExperiencePage(object sender, RoutedEventArgs e)
+        {
+            pageContent.Navigate(new ExperiencePage(this.DataContext));
+        }
+
+        private void ChangeToNormalViewSize(object sender, RoutedEventArgs e)
+        {
+            if (WindowState == WindowState.Normal)
+            {
+                // Change the window state to Maximized
+                WindowState = WindowState.Maximized;
+            }
+            else
+            {
+                // Change the window state to Normal
+                WindowState = WindowState.Normal;
+            }
         }
     }
 }

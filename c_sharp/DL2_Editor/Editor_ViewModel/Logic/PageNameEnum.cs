@@ -4,6 +4,10 @@
     {
         InfoPage,
         SkillPage,
-        InventoryPage
+        ExperiencePage,
+        InventoryPage,
+        BackpackPage,
+        CampaignPage,
+        PlayerPage
     }
 }

@@ -9,9 +9,12 @@
 
   <ItemGroup>
     <None Remove="Pictures\Background.jpg" />
+    <None Remove="Pictures\file.png" />
+    <None Remove="Pictures\folder.png" />
     <None Remove="Pictures\icon.png" />
     <None Remove="Pictures\language.png" />
     <None Remove="Pictures\linguistics.png" />
+    <None Remove="Pictures\resize.png" />
     <None Remove="Pictures\zombie.png" />
   </ItemGroup>
 
@@ -21,9 +24,18 @@
 
   <ItemGroup>
     <Resource Include="Pictures\Background.jpg" />
+    <Resource Include="Pictures\file.png" />
+    <Resource Include="Pictures\folder.png" />
     <Resource Include="Pictures\icon.png" />
     <Resource Include="Pictures\language.png" />
+    <Resource Include="Pictures\resize.png" />
     <Resource Include="Pictures\zombie.png" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Update="Views\BackpackPage.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
   </ItemGroup>
 
 </Project>

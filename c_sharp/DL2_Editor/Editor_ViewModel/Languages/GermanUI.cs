@@ -34,8 +34,20 @@
         {
             get
             {
-                return "To be continued....";
+                return "Fortsetzung folgt......";
             }
         }
+
+        public string UnlockableItemsLabel => "Freischaltbarer Gegenstand";
+
+        public string ChunksLabel => "Stammdaten";
+
+        public string FileInformationLabel => "Datei Information";
+
+        public string FileInformationText => "Die angegebene Datei wurde ausgewählt:";
+
+        public string FileLabel => "Datei";
+
+        public string SizeLabel => "Größe";
     }
 }

@@ -120,13 +120,21 @@
             }
             set
             {
-                if (value == null)
-                {
-                    throw new ArgumentNullException($"The {nameof(this.SaveFile)} must not be null!");
-                }
+                //if (value == null)
+                //{
+                //    throw new ArgumentNullException($"The {nameof(this.SaveFile)} must not be null!");
+                //}
 
                 this.saveFile = value;
                 this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(this.SaveFile)));
+            }
+        }
+
+        public bool IsSaveFileNull
+        {
+            get
+            {
+                return this.CheckIfSaveFileIsNull();
             }
         }
 
@@ -141,6 +149,21 @@
                 return new GenericCommand(obj =>
                 {
                     Environment.Exit(0);
+                });
+            }
+        }
+
+        /// <summary>
+        /// Gets the command for exiting the game.
+        /// </summary>
+        /// <value>The command which exits the game.</value>
+        public ICommand ResetCurrentSaveFile
+        {
+            get
+            {
+                return new GenericCommand(obj =>
+                {
+                    this.SaveFile = null;
                 });
             }
         }
@@ -185,28 +208,7 @@
 
         public void LoadFile(string filePath)
         {
-            try
-            {
-                // Open the file for reading in binary mode
-                using (FileStream fs = new FileStream(filePath, FileMode.Open, FileAccess.Read))
-                {
-                    // Create a byte array to hold the file contents
-                    byte[] fileContents = new byte[fs.Length];
-
-                    // Read the binary data from the file into the byte array
-                    fs.Read(fileContents, 0, (int)fs.Length);
-
-                    //// the fileContents byte array contains the binary data from the file
-                    //this.FileContents = BitConverter.ToString(fileContents).Replace("-", " ");
-                    this.FileAnalizer.AnalyzeUnlockableItemsData(fileContents);
-                }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine("An error occurred: " + ex.Message);
-            }
-
-            this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(this.FileContents)));
+            this.FileAnalizer.ReadSaveFile(filePath);
         }
 
         protected void OnErrorMessage(object sender, ErrorMessageEventArgs e)
@@ -217,7 +219,8 @@
         protected void OnAnalizedFile(object sender, AnalizedSaveFileEventArgs e)
         {
             this.SaveFile = e.SaveFile;
-            this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(this.SaveFile.Items)));
+            this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(this.SaveFile)));
+            this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(this.FileContents)));
         }
 
         private ObservableCollection<ILanguageDisplay> CreateSupportedLanguages()
@@ -228,6 +231,16 @@
                 new GermanUI(),
                 new SpanishUI()
             };
+        }
+
+        private bool CheckIfSaveFileIsNull()
+        {
+            if (this.SaveFile == null)
+            {
+                return true;
+            }
+
+            return false;
         }
     }
 }

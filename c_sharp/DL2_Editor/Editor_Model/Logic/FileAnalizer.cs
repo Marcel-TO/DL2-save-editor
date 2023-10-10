@@ -47,27 +47,32 @@ namespace Editor_Model.Logic
 
         public event EventHandler<ErrorMessageEventArgs> ErrorMessage;
 
-        public void ExtractSkillBytes(byte[] data)
+        public event EventHandler<ReadFileEventArgs> ReadFile;
+
+        public void ReadFileContent(string filePath)
         {
-            int startIndex = this.FindSequenceIndex(data, 0, startSkills, true);
-            int endIndex = this.FindSequenceIndex(data, 0, endSkills, false);
-            
-            if (startIndex < 0 || endIndex <= 0)
+            try
             {
-                this.ExtractBytes?.Invoke(this, new ExtractBytesEventArgs(new byte[0]));
-                return;
-            }
+                // Open the file for reading in binary mode
+                using (FileStream fs = new FileStream(filePath, FileMode.Open, FileAccess.Read))
+                {
+                    // Create a byte array to hold the file contents
+                    byte[] fileContents = new byte[fs.Length];
 
-            byte[] compactData = new byte[endIndex - startIndex];
-            for (int i = startIndex; i < endIndex; i++) 
+                    // Read the binary data from the file into the byte array
+                    fs.Read(fileContents, 0, (int)fs.Length);
+
+                    //// the fileContents byte array contains the binary data from the file
+                    this.ReadFile?.Invoke(this, new ReadFileEventArgs(filePath, fileContents));
+                }
+            }
+            catch (Exception ex)
             {
-                compactData[i - startIndex] = data[i];
+                this.ErrorMessage?.Invoke(this, new ErrorMessageEventArgs("An error occurred: " + ex.Message));
             }
-
-            this.ExtractBytes?.Invoke(this, new ExtractBytesEventArgs(compactData));
         }
 
-        public void FindSkillMatches(byte[] data)
+        private string[] FindSkillMatches(byte[] data)
         {
             List<string> matches = new List<string>();
             string stringData = Encoding.UTF8.GetString(data);
@@ -83,19 +88,52 @@ namespace Editor_Model.Logic
                 }
             }
 
-            this.FoundMatches?.Invoke(this, new FoundMatchesEventArgs(matches.ToArray()));
+            return matches.ToArray();
         }
 
-        public void AnalyzeUnlockableItemsData(byte[] fileContents)
+        private BaseItem[] AnalizeSkillData(byte[] data, string[] matches, int startingIndex)
+        {
+            List<BaseItem> skills = new List<BaseItem>();
+
+            for (int i = 0; i < matches.Length; i++)
+            {
+                byte[] matchBytes = Encoding.UTF8.GetBytes(matches[i]);
+                int index = this.FindSequenceIndex(data, 0, matchBytes, false);
+                skills.Add(new SkillIItem(matches[i].Replace("\x00", "").TrimEnd('\x01'), index + startingIndex, matchBytes.Length, matchBytes, BitConverter.ToString(matchBytes).Replace("-", " ")));
+            }
+
+            return skills.ToArray();
+        }
+
+        public void LoadSaveFile(string filePath, byte[] data)
+        {
+            // find all skills.
+            int skillStartIndex = this.FindSequenceIndex(data, 0, startSkills, true);
+            int skillEndIndex = this.FindSequenceIndex(data, 0, endSkills, false);
+            byte[] skillDataRange = this.ExtractByteInRange(data, skillStartIndex, skillEndIndex);
+            BaseItem[] skills = this.AnalizeSkillData(skillDataRange, this.FindSkillMatches(skillDataRange), skillStartIndex);
+            BaseItem[] items = this.AnalizeUnlockableItemsData(data);
+            BaseItem lastItem = items[items.Length - 1];
+
+            // the space between the SDG IDs and chunk data.
+            int jumpOffset = lastItem.Index + lastItem.Size + 75;
+            InventoryChunk[] chunks = this.FindAllInventoryChunks(data, jumpOffset);
+            this.AnalizedSaveFile?.Invoke(this, new AnalizedSaveFileEventArgs(new SaveFile(filePath, data, BitConverter.ToString(data).Replace("-", " "), items, chunks, skills)));
+        }
+
+
+
+        private BaseItem[] AnalizeUnlockableItemsData(byte[] fileContents)
         {
             // Finds all inventory sequences inside the file.
             int[] indizes = this.FindAllSequences(fileContents, 0, startInventory, true);
+            List<BaseItem> items = new List<BaseItem>();
 
             // Checks if the sequence is not valid.
             if (indizes == null || indizes.Length != 2)
             {
                 this.ErrorMessage?.Invoke(this, new ErrorMessageEventArgs("Start pattern(s) not found in file."));
-                return;
+                return items.ToArray();
             }
 
             // Takes the second inventory index for needed information.
@@ -117,10 +155,8 @@ namespace Editor_Model.Logic
             if (matchingStringIndizes.Count == 0)
             {
                 this.ErrorMessage?.Invoke(this, new ErrorMessageEventArgs("No matching strings found."));
-                return;
+                return items.ToArray();
             }
-
-            List<BaseItem> items = new List<BaseItem>();
 
             for (int i = 0; i < matchingStringIndizes.Count; i++)
             {
@@ -136,13 +172,8 @@ namespace Editor_Model.Logic
             BaseItem[] sortedItems = items.OrderBy(x => x.Index).ToArray();
             //Console.WriteLine(BitConverter.ToString(sortedItems[sortedItems.Length - 1].SdgData).Replace("-", " "));
             //Console.WriteLine($"Summary -> {sortedItems.Length} SDGs where found");
-            
-            BaseItem lastItem = sortedItems[sortedItems.Length - 1];
 
-            // the space between the SDG IDs and chunk data.
-            int jumpOffset = lastItem.Index + lastItem.Size + 75;
-            InventoryChunk[] chunks = this.FindAllInventoryChunks(inventoryData, jumpOffset - startIndex);
-            this.AnalizedSaveFile?.Invoke(this, new AnalizedSaveFileEventArgs(new SaveFile(fileContents, BitConverter.ToString(fileContents).Replace("-", " "), sortedItems, chunks)));
+            return sortedItems;
         }
 
         /// <summary>

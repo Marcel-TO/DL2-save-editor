@@ -31,5 +31,17 @@
         string InfoPageTitle { get; }
 
         string InfoPageIntroductionText { get; }
+
+        string UnlockableItemsLabel { get; }
+
+        string ChunksLabel { get; }
+
+        string FileInformationLabel { get; }
+
+        string FileInformationText { get; }
+
+        string FileLabel { get; }
+
+        string SizeLabel { get; }
     }
 }

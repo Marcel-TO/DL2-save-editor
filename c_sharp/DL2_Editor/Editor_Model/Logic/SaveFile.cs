@@ -5,6 +5,8 @@
 
     public class SaveFile
     {
+        private string path;
+
         private byte[] fileData;
 
         private string fileContent;
@@ -13,12 +15,34 @@
 
         private InventoryChunk[] chunks;
 
-        public SaveFile(byte[] fileData, string fileContent, BaseItem[] items, InventoryChunk[] chunks)
+        private BaseItem[] skills;
+
+        public SaveFile(string filepath, byte[] fileData, string fileContent, BaseItem[] items, InventoryChunk[] chunks, BaseItem[] skills)
         {
+            this.Path = filepath;
             this.FileData = fileData;
             this.FileContent = fileContent;
             this.Items = items;
             this.Chunks = chunks;
+            this.Skills = skills;
+        }
+
+        public string Path
+        {
+            get
+            {
+                return this.path;
+            }
+
+            private set
+            {
+                if (value == null)
+                {
+                    throw new ArgumentNullException($"The {nameof(this.Path)} must not be null.");
+                }
+
+                this.path = value;
+            }
         }
 
         public byte[] FileData
@@ -90,6 +114,24 @@
                 }
 
                 this.chunks = value;
+            }
+        }
+
+        public BaseItem[] Skills
+        {
+            get
+            {
+                return this.skills;
+            }
+
+            private set
+            {
+                if (value == null)
+                {
+                    throw new ArgumentNullException($"The {nameof(this.Skills)} must not be null.");
+                }
+
+                this.skills = value;
             }
         }
     }

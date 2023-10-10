@@ -4,26 +4,62 @@
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
       xmlns:local="clr-namespace:Editor_View.Views"
+      xmlns:vm="clr-namespace:Editor_ViewModel;assembly=Editor_ViewModel"
       mc:Ignorable="d" 
       d:DesignHeight="450" d:DesignWidth="800"
       Title="ExperiencePage">
 
-    <Grid Background="Black" 
-                Opacity="0.5">
-        <Grid.RowDefinitions>
-            <RowDefinition Height="2*"/>
-            <RowDefinition Height="8*"/>
-            <RowDefinition Height="*"/>
-        </Grid.RowDefinitions>
+    <Page.DataContext>
+        <vm:MainViewModel/>
+    </Page.DataContext>
 
-        <TextBlock 
-            Grid.Row="0"
-            Background="Transparent"
-            Foreground="#e9eecd"
-            FontSize="40"
-            HorizontalAlignment="Center"
-            VerticalAlignment="Center"
-            TextWrapping="Wrap"
-            Text="ExperiencePage"/>
+    <Grid>
+        <GroupBox Background="#80000000" Header="{Binding SelectedLanguage.ExperienceLabel}" Foreground="#e9eecd" BorderBrush="#e9eecd" BorderThickness="0.5">
+            <!-- Black background with 50% opacity -->
+            <TabControl Background="Transparent">
+                <TabControl.Resources>
+                    <!-- TabItem style for default state -->
+                    <Style TargetType="TabItem">
+                        <Setter Property="BorderBrush" Value="#e9eecd"/>
+                        <Setter Property="Foreground" Value="#e9eecd"/>
+                        <Setter Property="Background" Value="Transparent"/>
+                        <Setter Property="Cursor" Value="Hand"/>
+                        <Setter Property="Template">
+                            <Setter.Value>
+                                <ControlTemplate TargetType="TabItem">
+                                    <Grid Background="{TemplateBinding Background}">
+                                        <Border BorderThickness="1" BorderBrush="{TemplateBinding BorderBrush}" CornerRadius="5,5,0,0">
+                                            <ContentPresenter ContentSource="Header" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="10, 5, 10, 5"/>
+                                        </Border>
+                                    </Grid>
+                                    <ControlTemplate.Triggers>
+                                        <!-- TabItem style for hovered state -->
+                                        <Trigger Property="IsMouseOver" Value="True">
+                                            <Setter Property="Background" Value="#455450"/>
+                                            <Setter Property="Foreground" Value="#e9eecd"/>
+                                        </Trigger>
+                                        <!-- TabItem style for selected state -->
+                                        <Trigger Property="IsSelected" Value="True">
+                                            <Setter Property="Background" Value="#e9eecd"/>
+                                            <Setter Property="Foreground" Value="Black"/>
+                                            <Setter Property="BorderBrush" Value="Transparent"/>
+                                        </Trigger>
+                                    </ControlTemplate.Triggers>
+                                </ControlTemplate>
+                            </Setter.Value>
+                        </Setter>
+                    </Style>
+                </TabControl.Resources>
+
+                <!-- TabItem 1 -->
+                <TabItem Header="{Binding SelectedLanguage.ExperienceLabel}">
+                    <!-- Tab 1 Content -->
+                    <Grid Background="Transparent">
+                        <!-- Your content goes here -->
+                        <TextBlock Text="Tab 1 Content" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="#e9eecd"/>
+                    </Grid>
+                </TabItem>
+            </TabControl>
+        </GroupBox>
     </Grid>
 </Page>

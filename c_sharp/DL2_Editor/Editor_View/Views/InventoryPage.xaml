@@ -14,18 +14,46 @@
     </Page.DataContext>
 
     <Grid>
-        <!-- Main Content Section: Left List and Right Text Field -->
-        <Grid>
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="*"/>
-            </Grid.ColumnDefinitions>
+        <GroupBox Background="#80000000" Header="{Binding SelectedLanguage.InventoryLabel}" Foreground="#e9eecd" BorderBrush="#e9eecd" BorderThickness="0.5">
+            <TabControl Background="Transparent">
+                <TabControl.Resources>
+                    <!-- TabItem style for default state -->
+                    <Style TargetType="TabItem">
+                        <Setter Property="BorderBrush" Value="#e9eecd"/>
+                        <Setter Property="Foreground" Value="#e9eecd"/>
+                        <Setter Property="Background" Value="Transparent"/>
+                        <Setter Property="Cursor" Value="Hand"/>
+                        <Setter Property="Template">
+                            <Setter.Value>
+                                <ControlTemplate TargetType="TabItem">
+                                    <Grid Background="{TemplateBinding Background}">
+                                        <Border BorderThickness="1" BorderBrush="{TemplateBinding BorderBrush}" CornerRadius="5,5,0,0">
+                                            <ContentPresenter ContentSource="Header" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="10, 5, 10, 5"/>
+                                        </Border>
+                                    </Grid>
+                                    <ControlTemplate.Triggers>
+                                        <!-- TabItem style for hovered state -->
+                                        <Trigger Property="IsMouseOver" Value="True">
+                                            <Setter Property="Background" Value="#455450"/>
+                                            <Setter Property="Foreground" Value="#e9eecd"/>
+                                        </Trigger>
+                                        <!-- TabItem style for selected state -->
+                                        <Trigger Property="IsSelected" Value="True">
+                                            <Setter Property="Background" Value="#e9eecd"/>
+                                            <Setter Property="Foreground" Value="Black"/>
+                                            <Setter Property="BorderBrush" Value="Transparent"/>
+                                        </Trigger>
+                                    </ControlTemplate.Triggers>
+                                </ControlTemplate>
+                            </Setter.Value>
+                        </Setter>
+                    </Style>
+                </TabControl.Resources>
 
-
-            <!--Left Side: List of Items-->
-
-            <ListView Grid.ColumnSpan="2"
-                      Name="itemListView" 
+                <!-- TabItem 1 -->
+                <TabItem Header="{Binding SelectedLanguage.UnlockableItemsLabel}">
+                    <ListView
+                      Name="onlockableItems" 
                       Margin="10" 
                       Width="Auto" 
                       Background="Black" 
@@ -33,41 +61,90 @@
                       Opacity="0.5"
                       BorderBrush="#e9eecd"
                       ItemsSource="{Binding SaveFile.Items}">
-                <ListView.View>
-                    <GridView AllowsColumnReorder="true" ColumnHeaderToolTip="Item Information">
-                        <GridViewColumn DisplayMemberBinding="{Binding Name}" Header="Name" Width="250"/>
-                        <GridViewColumn DisplayMemberBinding="{Binding Index}" Header="Index" Width="100"/>
-                        <GridViewColumn DisplayMemberBinding="{Binding SdgString}" Header="SDG Data" Width="400"/>
-                    </GridView>
-                </ListView.View>
-                <ListView.ItemContainerStyle>
-                    <Style TargetType="ListViewItem">
-                        <Style.Triggers>
-                            <Trigger Property="IsMouseOver" Value="True">
-                                <Setter Property="Foreground" Value="Black"/>
-                            </Trigger>
-                        </Style.Triggers>
-                    </Style>
-                </ListView.ItemContainerStyle>
-            </ListView>
+                        <ListView.View>
+                            <GridView AllowsColumnReorder="true" ColumnHeaderToolTip="Item Information">
+                                <GridViewColumn DisplayMemberBinding="{Binding Name}" Header="Name" Width="250">
+                                    <GridViewColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <TextBlock Text="{Binding Name}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                        </DataTemplate>
+                                    </GridViewColumn.CellTemplate>
+                                </GridViewColumn>
+                                <GridViewColumn Header="Index" Width="100">
+                                    <GridViewColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <TextBlock Text="{Binding Index}" HorizontalAlignment="Stretch" VerticalAlignment="Center"/>
+                                        </DataTemplate>
+                                    </GridViewColumn.CellTemplate>
+                                </GridViewColumn>
+                                <GridViewColumn Header="Size" Width="50">
+                                    <GridViewColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <Grid HorizontalAlignment="Center">
+                                                <TextBlock Text="{Binding Size}" HorizontalAlignment="Stretch" VerticalAlignment="Center"/>
+                                            </Grid>
+                                            
+                                        </DataTemplate>
+                                    </GridViewColumn.CellTemplate>
+                                </GridViewColumn>
+                                <GridViewColumn DisplayMemberBinding="{Binding SdgString}" Header="SDG Data" Width="Auto">
+                                    <GridViewColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <TextBlock Text="{Binding SdgString}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                        </DataTemplate>
+                                    </GridViewColumn.CellTemplate>
+                                </GridViewColumn>
+                            </GridView>
+                        </ListView.View>
+                        <ListView.ItemContainerStyle>
+                            <Style TargetType="ListViewItem">
+                                <Setter Property="HorizontalAlignment" Value="Stretch"/>
+                                <Style.Triggers>
+                                    <Trigger Property="IsMouseOver" Value="True">
+                                        <Setter Property="Foreground" Value="Black"/>
+                                    </Trigger>
+                                    <Trigger Property="IsSelected" Value="True">
+                                        <Setter Property="Background" Value="#455450"/>
+                                    </Trigger>
+                                </Style.Triggers>
+                            </Style>
+                        </ListView.ItemContainerStyle>
 
+                    </ListView>
+                </TabItem>
 
-
-
-            <!--Right Side: Text Field-->
-            <!--<TextBox 
-                Grid.Column="1" 
-                Name="textField" 
-                Margin="10" 
-                Padding="10"
-                Background="Black" 
-                Opacity="0.5"
-                BorderBrush="#e9eecd"
-                Foreground="#e9eecd"
-                VerticalScrollBarVisibility="Auto"
-                TextWrapping="Wrap"
-                Text="{Binding FileContents,Mode=OneWay}"
-                />-->
-        </Grid>
+                <!-- TabItem 2 -->
+                <TabItem Header="{Binding SelectedLanguage.ChunksLabel}">
+                    <ListView
+                      Name="chunkItems" 
+                      Margin="10" 
+                      Width="Auto" 
+                      Background="Black" 
+                      Foreground="#e9eecd"
+                      Opacity="0.5"
+                      BorderBrush="#e9eecd"
+                      ItemsSource="{Binding SaveFile.Chunks}">
+                        <ListView.View>
+                            <GridView AllowsColumnReorder="true" ColumnHeaderToolTip="Item Information">
+                                <GridViewColumn DisplayMemberBinding="{Binding DataString}" Header="Data (12 Bytes)" Width="300"/>
+                                <GridViewColumn DisplayMemberBinding="{Binding SpaceString}" Header="Space (25 Bytes)" Width="Auto"/>
+                            </GridView>
+                        </ListView.View>
+                        <ListView.ItemContainerStyle>
+                            <Style TargetType="ListViewItem">
+                                <Style.Triggers>
+                                    <Trigger Property="IsMouseOver" Value="True">
+                                        <Setter Property="Foreground" Value="Black"/>
+                                    </Trigger>
+                                    <Trigger Property="IsSelected" Value="True">
+                                        <Setter Property="Background" Value="#455450"/>
+                                    </Trigger>
+                                </Style.Triggers>
+                            </Style>
+                        </ListView.ItemContainerStyle>
+                    </ListView>
+                </TabItem>
+            </TabControl>
+        </GroupBox>
     </Grid>
 </Page>

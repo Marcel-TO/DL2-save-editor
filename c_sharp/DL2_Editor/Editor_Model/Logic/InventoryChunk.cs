@@ -8,10 +8,16 @@
 
         private byte[] _space;
 
+        private string _dataString;
+
+        private string _spaceString;
+
         public InventoryChunk(byte[] data, byte[] space)
         {
             this.Data = data;
             this.Space = space;
+            this.DataString = BitConverter.ToString(data).Replace("-", " ");
+            this.SpaceString = BitConverter.ToString(space).Replace("-", " ");
         }
 
         public byte[] Data
@@ -55,6 +61,42 @@
                 }
 
                 this._space = value;
+            }
+        }
+
+        public string DataString
+        {
+            get
+            {
+                return this._dataString;
+            }
+
+            private set
+            {
+                if (value == null)
+                {
+                    throw new ArgumentNullException($"The {nameof(this.DataString)} must not be null.");
+                }
+
+                this._dataString = value;
+            }
+        }
+
+        public string SpaceString
+        {
+            get
+            {
+                return this._spaceString;
+            }
+
+            private set
+            {
+                if (value == null)
+                {
+                    throw new ArgumentNullException($"The {nameof(this.SpaceString)} must not be null.");
+                }
+
+                this._spaceString = value;
             }
         }
     }

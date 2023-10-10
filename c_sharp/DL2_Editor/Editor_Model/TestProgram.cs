@@ -27,14 +27,14 @@ namespace Editor_Model
 
                     //// the fileContents byte array contains the binary data from the file
                     //this.FileContents = BitConverter.ToString(fileContents).Replace("-", " ");
-                    fileAnalizer.AnalyzeUnlockableItemsData(fileContents);
+                    fileAnalizer.LoadSaveFile(filePath, fileContents);
                 }
             }
             catch (Exception ex)
             {
                 Console.WriteLine("An error occurred: " + ex.Message);
             }
-            
+
         }
     }
 }

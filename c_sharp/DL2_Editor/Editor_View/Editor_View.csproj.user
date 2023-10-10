@@ -18,6 +18,9 @@
     <Page Update="MainWindow.xaml">
       <SubType>Designer</SubType>
     </Page>
+    <Page Update="Views\BackpackPage.xaml">
+      <SubType>Designer</SubType>
+    </Page>
     <Page Update="Views\InfoPage.xaml">
       <SubType>Designer</SubType>
     </Page>
