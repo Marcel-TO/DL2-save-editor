@@ -11,6 +11,7 @@
     - [Pages](#pages)
     - [Communication between View and ViewModel](#communication-between-view-and-viewmodel)
     - [Structure](#structure)
+  - [Preparing executable](#preparing-executable)
   - [Contributers](#contributers)
 
 ---
@@ -116,6 +117,16 @@ public class MyViewModel : INotifyPropertyChanged
 
 ### Structure
 The MainViewModel communicates with the Model to initiate data-related operations. This communication typically involves calling methods or properties in the Model. For example, when a user clicks a button in the View to process a file, the MainViewModel triggers a method in the Model responsible for reading and processing the file's bytes.
+
+## Preparing executable
+Since the executable generates, after going to the current `.csproj` and using the command `dotnet publish -c Release`, an exe that is only running for people that have .NET installed, there must pe some prerequisites made.
+In the `.csproj` file one line has to be added into the `PropertyGroup` element:
+```xml
+      <PublishSingleFile>true</PublishSingleFile>
+      <SelfContained>true</SelfContained>
+      <RuntimeIdentifier>win-x64</RuntimeIdentifier>
+```
+> The RuntimeIdentifier has to be customized depending on your processor! For further information click [here](https://learn.microsoft.com/en-us/dotnet/core/rid-catalog)
 
 ## Contributers
 Currently there are 2 contributers that work hard to increase the experience of Dying Light 2. With the help of Caz`s incredible knowledge of savegamefiles and the coding experience of Marcel, the Editor is not only extremely useful, but has a modern UI with Dying Light 2 themed content.
