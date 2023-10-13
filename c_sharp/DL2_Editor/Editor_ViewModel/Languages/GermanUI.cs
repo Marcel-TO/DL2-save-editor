@@ -40,7 +40,7 @@
 
         public string UnlockableItemsLabel => "Freischaltbarer Gegenstand";
 
-        public string ChunksLabel => "Stammdaten";
+        public string ItemsLabel => "Gegenstände";
 
         public string FileInformationLabel => "Datei Information";
 

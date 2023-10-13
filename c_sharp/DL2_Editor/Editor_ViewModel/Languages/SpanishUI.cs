@@ -40,7 +40,7 @@
 
         public string UnlockableItemsLabel => "Objeto desbloqueable";
 
-        public string ChunksLabel => "Fragmentos de datos";
+        public string ItemsLabel => "Artículos";
 
         public string FileInformationLabel => "información de archivo";
 

@@ -11,19 +11,19 @@
 
         private string fileContent;
 
-        private BaseItem[] items;
+        private UnlockableItems[] unlockableItems;
 
-        private InventoryChunk[] chunks;
+        private List<InventoryItem[]> items;
 
-        private BaseItem[] skills;
+        private SkillIItem[] skills;
 
-        public SaveFile(string filepath, byte[] fileData, string fileContent, BaseItem[] items, InventoryChunk[] chunks, BaseItem[] skills)
+        public SaveFile(string filepath, byte[] fileData, string fileContent, List<InventoryItem[]> items, SkillIItem[] skills, UnlockableItems[] unlockableItems)
         {
             this.Path = filepath;
             this.FileData = fileData;
             this.FileContent = fileContent;
             this.Items = items;
-            this.Chunks = chunks;
+            this.UnlockableItems = unlockableItems;
             this.Skills = skills;
         }
 
@@ -81,7 +81,7 @@
             }
         }
 
-        public BaseItem[] Items
+        public List<InventoryItem[]> Items
         {
             get
             {
@@ -99,25 +99,25 @@
             }
         }
 
-        public InventoryChunk[] Chunks
+        public UnlockableItems[] UnlockableItems
         {
             get
             {
-                return this.chunks;
+                return this.unlockableItems;
             }
 
             private set
             {
                 if (value == null)
                 {
-                    throw new ArgumentNullException($"The {nameof(this.Chunks)} must not be null.");
+                    throw new ArgumentNullException($"The {nameof(this.UnlockableItems)} must not be null.");
                 }
 
-                this.chunks = value;
+                this.unlockableItems = value;
             }
         }
 
-        public BaseItem[] Skills
+        public SkillIItem[] Skills
         {
             get
             {

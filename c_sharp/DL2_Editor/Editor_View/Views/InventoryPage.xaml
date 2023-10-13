@@ -60,7 +60,7 @@
                       Foreground="#e9eecd"
                       Opacity="0.5"
                       BorderBrush="#e9eecd"
-                      ItemsSource="{Binding SaveFile.Items}">
+                      ItemsSource="{Binding SaveFile.UnlockableItems}">
                         <ListView.View>
                             <GridView AllowsColumnReorder="true" ColumnHeaderToolTip="Item Information">
                                 <GridViewColumn DisplayMemberBinding="{Binding Name}" Header="Name" Width="250">
@@ -114,36 +114,43 @@
                 </TabItem>
 
                 <!-- TabItem 2 -->
-                <TabItem Header="{Binding SelectedLanguage.ChunksLabel}">
-                    <ListView
-                      Name="chunkItems" 
-                      Margin="10" 
-                      Width="Auto" 
-                      Background="Black" 
-                      Foreground="#e9eecd"
-                      Opacity="0.5"
-                      BorderBrush="#e9eecd"
-                      ItemsSource="{Binding SaveFile.Chunks}">
-                        <ListView.View>
-                            <GridView AllowsColumnReorder="true" ColumnHeaderToolTip="Item Information">
-                                <GridViewColumn DisplayMemberBinding="{Binding DataString}" Header="Data (12 Bytes)" Width="300"/>
-                                <GridViewColumn DisplayMemberBinding="{Binding SpaceString}" Header="Space (25 Bytes)" Width="Auto"/>
-                            </GridView>
-                        </ListView.View>
-                        <ListView.ItemContainerStyle>
-                            <Style TargetType="ListViewItem">
-                                <Style.Triggers>
-                                    <Trigger Property="IsMouseOver" Value="True">
-                                        <Setter Property="Foreground" Value="Black"/>
-                                    </Trigger>
-                                    <Trigger Property="IsSelected" Value="True">
-                                        <Setter Property="Background" Value="#455450"/>
-                                    </Trigger>
-                                </Style.Triggers>
-                            </Style>
-                        </ListView.ItemContainerStyle>
-                    </ListView>
-                </TabItem>
+                <TabControl Name="tabControl" Margin="10" Width="Auto" Background="Black" Foreground="#e9eecd">
+                    <TabControl.ItemContainerStyle>
+                        <Style TargetType="TabItem">
+                            <Setter Property="Header" Value="{Binding SelectedLanguage.ItemsLabel}" />
+                        </Style>
+                    </TabControl.ItemContainerStyle>
+                    <ItemsControl ItemsSource="{Binding SaveFile.Items}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <TabItem>
+                                    <ListView Name="chunkItems" Margin="10" Width="Auto" Background="Black" Foreground="#e9eecd" Opacity="0.5" BorderBrush="#e9eecd"
+                              ItemsSource="{Binding}">
+                                        <ListView.View>
+                                            <GridView AllowsColumnReorder="true" ColumnHeaderToolTip="Item Information">
+                                                <GridViewColumn DisplayMemberBinding="{Binding DataString}" Header="Data (12 Bytes)" Width="300"/>
+                                                <GridViewColumn DisplayMemberBinding="{Binding SpaceString}" Header="Space (25 Bytes)" Width="Auto"/>
+                                            </GridView>
+                                        </ListView.View>
+                                        <ListView.ItemContainerStyle>
+                                            <Style TargetType="ListViewItem">
+                                                <Style.Triggers>
+                                                    <Trigger Property="IsMouseOver" Value="True">
+                                                        <Setter Property="Foreground" Value="Black"/>
+                                                    </Trigger>
+                                                    <Trigger Property="IsSelected" Value="True">
+                                                        <Setter Property="Background" Value="#455450"/>
+                                                    </Trigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </ListView.ItemContainerStyle>
+                                    </ListView>
+                                </TabItem>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </TabControl>
+
             </TabControl>
         </GroupBox>
     </Grid>

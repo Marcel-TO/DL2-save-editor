@@ -34,7 +34,7 @@
 
         string UnlockableItemsLabel { get; }
 
-        string ChunksLabel { get; }
+        string ItemsLabel { get; }
 
         string FileInformationLabel { get; }
 

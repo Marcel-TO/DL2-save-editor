@@ -78,7 +78,7 @@ namespace Editor_Model.Logic
             List<string> matches = new List<string>();
             string stringData = Encoding.UTF8.GetString(data);
             
-            string pattern = @"([A-Za-z0-9_]+_skill)(..)";
+            string pattern = @"([A-Za-z0-9_]+_skill)";
             MatchCollection matchCollection = Regex.Matches(stringData, pattern);
 
             foreach (Match match in matchCollection)
@@ -92,15 +92,15 @@ namespace Editor_Model.Logic
             return matches.ToArray();
         }
 
-        private BaseItem[] AnalizeSkillData(byte[] data, string[] matches, int startingIndex)
+        private SkillIItem[] AnalizeSkillData(byte[] data, string[] matches, int startingIndex)
         {
-            List<BaseItem> skills = new List<BaseItem>();
+            List<SkillIItem> skills = new List<SkillIItem>();
 
             for (int i = 0; i < matches.Length; i++)
             {
                 byte[] matchBytes = Encoding.UTF8.GetBytes(matches[i]);
-                int index = this.FindSequenceIndex(data, 0, matchBytes, false);
-                skills.Add(new SkillIItem(matches[i].Replace("\x00", "").TrimEnd('\x01'), index + startingIndex, matchBytes.Length, matchBytes, BitConverter.ToString(matchBytes).Replace("-", " ")));
+                int index = this.FindSequenceIndex(data, 0, matchBytes, false) + startingIndex; // Due to the startingindex Offset
+                skills.Add(new SkillIItem(matches[i].Replace("\x00", "").TrimEnd('\x01'), index, matchBytes.Length,matchBytes,this.ExtractByteInRange(data, index + matchBytes.Length, index + matchBytes.Length + 2)));
             }
 
             return skills.ToArray();
@@ -112,24 +112,91 @@ namespace Editor_Model.Logic
             int skillStartIndex = this.FindSequenceIndex(data, 0, startSkills, true);
             int skillEndIndex = this.FindSequenceIndex(data, 0, endSkills, false);
             byte[] skillDataRange = this.ExtractByteInRange(data, skillStartIndex, skillEndIndex);
-            BaseItem[] skills = this.AnalizeSkillData(skillDataRange, this.FindSkillMatches(skillDataRange), skillStartIndex);
-            BaseItem[] unlockItems = this.AnalizeUnlockableItemsData(data);
-            BaseItem lastItem = items[unlockItems.Length - 1];
+            SkillIItem[] skills = this.AnalizeSkillData(skillDataRange, this.FindSkillMatches(skillDataRange), skillStartIndex);
+
+            UnlockableItems[] unlockItems = this.AnalizeUnlockableItemsData(data);
+            UnlockableItems lastItem = unlockItems[unlockItems.Length - 1];
 
             // the space between the SDG IDs and chunk data.
             int jumpOffset = lastItem.Index + lastItem.Size + 75;
-            InventoryChunk[] chunks = this.FindAllInventoryChunks(data, jumpOffset);
-            this.AnalizedSaveFile?.Invoke(this, new AnalizedSaveFileEventArgs(new SaveFile(filePath, data, BitConverter.ToString(data).Replace("-", " "), items, chunks, skills)));
+            List<InventoryItem[]> items = this.GetAllItems(data, jumpOffset);
+            this.AnalizedSaveFile?.Invoke(this, new AnalizedSaveFileEventArgs(new SaveFile(filePath, data, BitConverter.ToString(data).Replace("-", " "), items, skills, unlockItems)));
         }
 
-        private List<BaseItem[]> GetAllItems(byte[] data, int startIndex) {
-            List<BaseItem[]> items = new List<BaseItem[]>();
+        private List<InventoryItem[]> GetAllItems(byte[] data, int startIndex) {
+            List<InventoryItem[]> items = new List<InventoryItem[]>();
+            int index = startIndex;
 
             while (true) 
             {
-                (InventoryChunk[] chunks, int index) = this.FindAllInventoryChunks(data, jumpOffset);
-                string[] currentItemIDs = this.FindAmountOfMatches(this.ExtractByteInRange(data,index, data.Length),chunks.Length);
+                List<InventoryItem> innerItemList = new List<InventoryItem>();
+                (InventoryChunk[] chunks, int newIndex) = this.FindAllInventoryChunks(data, index);
+                if (chunks.Length == 0)
+                {
+                    break;
+                }
+
+                string[] currentItemIDs = this.FindAmountOfMatches(this.ExtractByteInRange(data, newIndex, data.Length),chunks.Length);
+
+                // Preparing Mod counter
+                int modCounter = 0;
+                string currentItemID = string.Empty;
+                int currentItemIndex = 0;
+                int chunkCounter = 0;
+                InventoryChunk currentInvChunk = chunks[0];
+                byte[] matchBytes = Encoding.UTF8.GetBytes(currentItemID);
+                List<Mod> mods = new List<Mod>(4);
+
+                for (int i = 0; i < currentItemIDs.Length; i++)
+                {
+                    // get current ID
+                    if (modCounter == 0)
+                    {
+                        currentItemID = currentItemIDs[i];
+                        matchBytes = Encoding.UTF8.GetBytes(currentItemIDs[i]);
+                        currentItemIndex = this.FindSequenceIndex(data, 0, matchBytes, false);
+                        modCounter++;
+                        currentInvChunk = chunks[chunkCounter];
+                        chunkCounter++;
+                    }
+                    // add item when mod counter is full.
+                    else if (modCounter > 4)
+                    {
+                        innerItemList.Add(new InventoryItem(currentItemID.Replace("\x00", "").TrimEnd('\x01'), currentItemIndex, matchBytes.Length, matchBytes, currentInvChunk, mods.ToArray()));
+
+                        modCounter = 0;
+                        mods = new List<Mod>(4);
+                        i--;
+                    }
+                    // add mod to mods list
+                    else
+                    {
+                        // Find Index
+                        // The offset between item and mods is always 30!
+                        int currModIndex = currentItemIndex + matchBytes.Length + 30;
+                        for (int j = 0; j < mods.Count; j++)
+                        {
+                            currModIndex += Encoding.UTF8.GetByteCount(mods[j].Name) + mods[j].Data.Length;
+                        }
+
+                        // Offset is the 12 Bytes data and 25 Bytes space
+                        mods.Add(new Mod(currentItemIDs[i], this.ExtractByteInRange(data, currModIndex, currModIndex + 30)));
+                        modCounter++;
+                    }                    
+                }
+
+                // Add the last item
+                if (modCounter > 4)
+                {
+                    innerItemList.Add(new InventoryItem(currentItemID.Replace("\x00", "").TrimEnd('\x01'), currentItemIndex, matchBytes.Length, matchBytes, currentInvChunk, mods.ToArray()));
+                }
+
+                items.Add(innerItemList.ToArray());
+                index = innerItemList[innerItemList.Count - 1].Index + innerItemList[innerItemList.Count - 1].Size;
+                index += 75;
             }
+
+            return items;
         }
 
         private string[] FindAmountOfMatches(byte[] data, int amount)
@@ -138,28 +205,29 @@ namespace Editor_Model.Logic
             List<string> matches = new List<string>();
             string stringData = Encoding.UTF8.GetString(data);
             
-            string pattern = @"([A-Za-z0-9_])";
+            string pattern = @"[A-Za-z0-9_]+";
             Match match = Regex.Match(stringData, pattern);
 
             while (match.Success) 
             {
-                if (counter < amount)
+                // amount * 4 since there are 4 mod slots for each item. Even tokens, I mean why not, right?
+                if (counter < amount + amount * 4 && match.Value.Length >= 4)
                 {
-                    matches.Add(match.value);
+                    matches.Add(match.Value);
+                    counter++;
                 }
 
                 match = match.NextMatch();
-                counter++;
             }
 
             return matches.ToArray();
         }
 
-        private BaseItem[] AnalizeUnlockableItemsData(byte[] fileContents)
+        private UnlockableItems[] AnalizeUnlockableItemsData(byte[] fileContents)
         {
             // Finds all inventory sequences inside the file.
             int[] indizes = this.FindAllSequences(fileContents, 0, startInventory, true);
-            List<BaseItem> items = new List<BaseItem>();
+            List<UnlockableItems> items = new List<UnlockableItems>();
 
             // Checks if the sequence is not valid.
             if (indizes == null || indizes.Length != 2)
@@ -197,11 +265,11 @@ namespace Editor_Model.Logic
                 int size = Encoding.UTF8.GetBytes(cleanString).Length;
                 // Console.WriteLine($"Index/Offset: {currentIndex}, Size: {size}, String: {cleanString}");
                 byte[] sdg = this.ExtractByteInRange(inventoryData, matchingStringIndizes[i], matchingStringIndizes[i] + size);
-                items.Add(new UnlockableItems(cleanString, currentIndex, size, sdg, BitConverter.ToString(sdg).Replace("-", " ")));
+                items.Add(new UnlockableItems(cleanString, currentIndex, size, sdg));
             }
 
             // Sort the itemlist, so that the last entry is at the end
-            BaseItem[] sortedItems = items.OrderBy(x => x.Index).ToArray();
+            UnlockableItems[] sortedItems = items.OrderBy(x => x.Index).ToArray();
             //Console.WriteLine(BitConverter.ToString(sortedItems[sortedItems.Length - 1].SdgData).Replace("-", " "));
             //Console.WriteLine($"Summary -> {sortedItems.Length} SDGs where found");
 
@@ -282,6 +350,8 @@ namespace Editor_Model.Logic
                     }
                     else
                     {
+                        // Need to remove the last parse, since the offset would be off.
+                        index = dataIndex - distanceBetweenSDGs;
                         break;
                     }
 

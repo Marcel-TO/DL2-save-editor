@@ -15,16 +15,12 @@
 
         private string _sdgString;
 
-        private InventoryChunk _chunkData;
-
-        public BaseItem(string name, int index, int size, byte[] sdgData, string sdgString, InventoryChunk chunkData)
+        public BaseItem(string name, int index, int size, byte[] sdgData)
         {
             this.Name = name;
             this.Index = index;
             this.Size = size;
             this.SdgData = sdgData;
-            this.SdgString = sdgString;
-            this.ChunkData = chunkData;
         }
 
         public string Name
@@ -96,6 +92,7 @@
                 }
 
                 this._sdgData = value;
+                this.SdgString = BitConverter.ToString(value).Replace("-", " ");
             }
         }
 
@@ -114,24 +111,6 @@
                 }
 
                 this._sdgString = value;
-            }
-        }
-
-        public InventoryChunk ChunkData
-        {
-            get
-            {
-                return this._chunkData;
-            }
-
-            private set
-            {
-                if (value == null)
-                {
-                    throw new ArgumentNullException($"The {nameof(this.ChunkData)} must not be null.");
-                }
-
-                this._chunkData = value;
             }
         }
     }

@@ -40,7 +40,7 @@
 
         public string UnlockableItemsLabel => "Unlockable Items";
 
-        public string ChunksLabel => "Chunks Data";
+        public string ItemsLabel => "Items";
 
         public string FileInformationLabel => "File information";
 

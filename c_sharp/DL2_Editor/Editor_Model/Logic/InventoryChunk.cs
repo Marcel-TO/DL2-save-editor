@@ -247,13 +247,9 @@
 
             private set
             {
-                if (value == null)
+                if (value < 0)
                 {
-                    throw new ArgumentNullException($"The {nameof(this.DataIndex)} must not be null.");
-                }
-                else if (value.Length != 2)
-                {
-                    throw new ArgumentOutOfRangeException($"The length of {nameof(this.DataIndex)} must be 2.");
+                    throw new ArgumentNullException($"The {nameof(this.DataIndex)} must not be negative.");
                 }
 
                 this.dataIndex = value;

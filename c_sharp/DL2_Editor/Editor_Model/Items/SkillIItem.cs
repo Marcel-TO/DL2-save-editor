@@ -5,8 +5,50 @@
 
     public class SkillIItem : BaseItem
     {
-        public SkillIItem(string name, int index, int size, byte[] sdgData, string sdgString, InventoryChunk chunkData) : base(name, index, size, sdgData, sdgString, chunkData)
+        private byte[] _points;
+
+        private string _pointsString;
+
+        public SkillIItem(string name, int index, int size, byte[] sdgData, byte[] points) : base(name, index, size, sdgData)
         {
+            this.Points = points;
+        }
+
+        public byte[] Points
+        {
+            get
+            {
+                return this._points;
+            }
+
+            private set
+            {
+                if (value == null)
+                {
+                    throw new ArgumentNullException($"The {nameof(this.Points)} must not be null.");
+                }
+
+                this._points = value;
+                this.PointsString = BitConverter.ToString(value).Replace("-", " ");
+            }
+        }
+
+        public string PointsString
+        {
+            get
+            {
+                return this._pointsString;
+            }
+
+            private set
+            {
+                if (value == null)
+                {
+                    throw new ArgumentNullException($"The {nameof(this.PointsString)} must not be null.");
+                }
+
+                this._pointsString = value;
+            }
         }
     }
 }
