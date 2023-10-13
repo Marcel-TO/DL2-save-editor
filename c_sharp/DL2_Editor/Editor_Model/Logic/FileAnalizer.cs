@@ -1,6 +1,7 @@
 namespace Editor_Model.Logic
 {
     using System;
+    using System.Linq;
     using System.Text;
     using System.Collections.Generic;
     using System.Text.RegularExpressions;
@@ -112,8 +113,8 @@ namespace Editor_Model.Logic
             int skillEndIndex = this.FindSequenceIndex(data, 0, endSkills, false);
             byte[] skillDataRange = this.ExtractByteInRange(data, skillStartIndex, skillEndIndex);
             BaseItem[] skills = this.AnalizeSkillData(skillDataRange, this.FindSkillMatches(skillDataRange), skillStartIndex);
-            BaseItem[] items = this.AnalizeUnlockableItemsData(data);
-            BaseItem lastItem = items[items.Length - 1];
+            BaseItem[] unlockItems = this.AnalizeUnlockableItemsData(data);
+            BaseItem lastItem = items[unlockItems.Length - 1];
 
             // the space between the SDG IDs and chunk data.
             int jumpOffset = lastItem.Index + lastItem.Size + 75;
@@ -121,7 +122,38 @@ namespace Editor_Model.Logic
             this.AnalizedSaveFile?.Invoke(this, new AnalizedSaveFileEventArgs(new SaveFile(filePath, data, BitConverter.ToString(data).Replace("-", " "), items, chunks, skills)));
         }
 
+        private List<BaseItem[]> GetAllItems(byte[] data, int startIndex) {
+            List<BaseItem[]> items = new List<BaseItem[]>();
 
+            while (true) 
+            {
+                (InventoryChunk[] chunks, int index) = this.FindAllInventoryChunks(data, jumpOffset);
+                string[] currentItemIDs = this.FindAmountOfMatches(this.ExtractByteInRange(data,index, data.Length),chunks.Length);
+            }
+        }
+
+        private string[] FindAmountOfMatches(byte[] data, int amount)
+        {
+            int counter = 0;
+            List<string> matches = new List<string>();
+            string stringData = Encoding.UTF8.GetString(data);
+            
+            string pattern = @"([A-Za-z0-9_])";
+            Match match = Regex.Match(stringData, pattern);
+
+            while (match.Success) 
+            {
+                if (counter < amount)
+                {
+                    matches.Add(match.value);
+                }
+
+                match = match.NextMatch();
+                counter++;
+            }
+
+            return matches.ToArray();
+        }
 
         private BaseItem[] AnalizeUnlockableItemsData(byte[] fileContents)
         {
@@ -182,7 +214,7 @@ namespace Editor_Model.Logic
         /// <param name="content">The content of the current save file.</param>
         /// <param name="startIndex">The starting index on where the search begins.</param>
         /// <returns>The array of all found chunks inside the inventory.</returns>
-        public InventoryChunk[] FindAllInventoryChunks(byte[] content, int startIndex)
+        public (InventoryChunk[], int) FindAllInventoryChunks(byte[] content, int startIndex)
         {
             // Checks if the index is out of range.
             if (startIndex >= content.Length)
@@ -194,27 +226,42 @@ namespace Editor_Model.Logic
             int index = startIndex;
 
             // Preparing offsets.
-            int dataOffset = 12;
+            int levelOffset = 2;
+            int seedOffset = 2;
+            int amountOffset = 4;
+            int durabilityOffset = 4;
             int spaceOffset = 25;
             int sdgOffset = 4;
+            int distanceBetweenSDGs = 75;
             
             // Iterates through the content until the parsing is not valid anymore
             while (true)
             {
                 // Represents the chunkData and the space to the next SDG.
-                // The data is always the same offset.
-                byte[] chunkData = new byte[] { };
+                // The data has always the same offset.
+                int dataIndex = index;
+                byte[] levelData = new byte[] { };
+                byte[] seedData = new byte[] { };
+                byte[] amountData = new byte[] { };
+                byte[] DurabilityData = new byte[] { };
                 byte[] chunkSpace = new byte[] { };
 
                 try
                 {
                     // Extracts the content
-                    chunkData = this.ExtractByteInRange(content, index, index + dataOffset);
-                    index += dataOffset;
+                    dataIndex = index;
+                    levelData = this.ExtractByteInRange(content, index, index + levelOffset);
+                    index += levelOffset;
+                    seedData = this.ExtractByteInRange(content, index, index + seedOffset);
+                    index += seedOffset;
+                    amountData = this.ExtractByteInRange(content, index, index + amountOffset);
+                    index += amountOffset;
+                    DurabilityData = this.ExtractByteInRange(content, index, index + durabilityOffset);
+                    index += durabilityOffset;
                     chunkSpace = this.ExtractByteInRange(content, index, index + spaceOffset);
                     index += spaceOffset;
 
-                    // Checks if after the chunk information follows an SDG -> {0x53, 0x47, 0x44, 0x73}
+                    // Checks if after the chunk information follows an SDGs -> {0x53, 0x47, 0x44, 0x73}
                     if (this.FindSequenceIndex(this.ExtractByteInRange(content, index, index + sdgOffset), 0, new byte[] { 0x53, 0x47, 0x44, 0x73 }, true) != -1)
                     {
                         // Checks if the content starts with 0x00 and the space as well 0x00, otherwise wrong SDGs would be included.
@@ -230,7 +277,7 @@ namespace Editor_Model.Logic
                             //Console.WriteLine($"SDGs found! Offset: {index}");
                             //Console.WriteLine(" ");
                             //Console.WriteLine("=======================================================================");
-                            chunks.Add(new InventoryChunk(chunkData, chunkSpace));
+                            chunks.Add(new InventoryChunk(levelData,seedData,amountData,DurabilityData,chunkSpace, dataIndex));
                         }
                     }
                     else
@@ -239,7 +286,7 @@ namespace Editor_Model.Logic
                     }
 
                     // After the SDG are 75 space. Due to the SDG length from before, we have to add it to the index.
-                    index += 75 + sdgOffset;
+                    index += distanceBetweenSDGs + sdgOffset;
                 }
                 catch (ArgumentOutOfRangeException)
                 {
@@ -247,7 +294,7 @@ namespace Editor_Model.Logic
                 }
             }
 
-            return chunks.ToArray();
+            return (chunks.ToArray(), index);
         }
 
         /// <summary>

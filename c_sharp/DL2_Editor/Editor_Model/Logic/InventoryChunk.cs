@@ -4,41 +4,124 @@
 
     public class InventoryChunk
     {
-        private byte[] _data;
+        private byte[] _level;
 
-        private byte[] _space;
+        private byte[] _seed;
 
-        private string _dataString;
+        private byte[] _amount;
+
+        private byte[] _durability;
+
+        private byte [] _space;
+
+        private int dataIndex;
+
+        private string _levelString;
+
+        private string _seedString;
+
+        private string _amountString;
+
+        private string _durabilityString;
 
         private string _spaceString;
 
-        public InventoryChunk(byte[] data, byte[] space)
+        public InventoryChunk(byte[] level, byte[] seed, byte[] amount, byte[] durability, byte[] space, int dataIndex)
         {
-            this.Data = data;
+            this.Level = level;
             this.Space = space;
-            this.DataString = BitConverter.ToString(data).Replace("-", " ");
-            this.SpaceString = BitConverter.ToString(space).Replace("-", " ");
+            this.DataIndex = dataIndex;
         }
 
-        public byte[] Data
+        public byte[] Level
         {
             get
             {
-                return this._data;
+                return this._level;
             }
 
             private set
             {
                 if (value == null)
                 {
-                    throw new ArgumentNullException($"The {nameof(this.Data)} must not be null.");
+                    throw new ArgumentNullException($"The {nameof(this.Level)} must not be null.");
                 }
-                else if (value.Length != 12)
+                else if (value.Length != 2)
                 {
-                    throw new ArgumentOutOfRangeException($"The length of {nameof(this.Data)} must be 12.");
+                    throw new ArgumentOutOfRangeException($"The length of {nameof(this.Level)} must be 2.");
                 }
 
-                this._data = value;
+                this._level = value;
+                this.LevelString = BitConverter.ToString(value).Replace("-", " ");
+            }
+        }
+
+        public byte[] Seed
+        {
+            get
+            {
+                return this._seed;
+            }
+
+            private set
+            {
+                if (value == null)
+                {
+                    throw new ArgumentNullException($"The {nameof(this.Seed)} must not be null.");
+                }
+                else if (value.Length != 2)
+                {
+                    throw new ArgumentOutOfRangeException($"The length of {nameof(this.Seed)} must be 2.");
+                }
+
+                this._seed = value;
+                this.SeedString = BitConverter.ToString(value).Replace("-", " ");
+            }
+        }
+
+        public byte[] Amount
+        {
+            get
+            {
+                return this._amount;
+            }
+
+            private set
+            {
+                if (value == null)
+                {
+                    throw new ArgumentNullException($"The {nameof(this.Amount)} must not be null.");
+                }
+                else if (value.Length != 4)
+                {
+                    throw new ArgumentOutOfRangeException($"The length of {nameof(this.Amount)} must be 4.");
+                }
+
+                this._amount = value;
+                this.AmountString = BitConverter.ToString(value).Replace("-", " ");
+            }
+        }
+
+        public byte[] Durability
+        {
+            get
+            {
+                return this._durability;
+            }
+
+            private set
+            {
+                if (value == null)
+                {
+                    throw new ArgumentNullException($"The {nameof(this.Durability)} must not be null.");
+                }
+                else if (value.Length != 4)
+                {
+                    throw new ArgumentOutOfRangeException($"The length of {nameof(this.Durability)} must be 2.");
+                }
+
+                this._durability = value;
+                this.DurabilityString = BitConverter.ToString(value).Replace("-", " ");
             }
         }
 
@@ -61,24 +144,79 @@
                 }
 
                 this._space = value;
+                this.SpaceString = BitConverter.ToString(value).Replace("-", " ");
             }
         }
 
-        public string DataString
+        public string LevelString
         {
             get
             {
-                return this._dataString;
+                return this._levelString;
             }
 
             private set
             {
                 if (value == null)
                 {
-                    throw new ArgumentNullException($"The {nameof(this.DataString)} must not be null.");
+                    throw new ArgumentNullException($"The {nameof(this.LevelString)} must not be null.");
                 }
 
-                this._dataString = value;
+                this._levelString = value;
+            }
+        }
+
+        public string SeedString
+        {
+            get
+            {
+                return this._seedString;
+            }
+
+            private set
+            {
+                if (value == null)
+                {
+                    throw new ArgumentNullException($"The {nameof(this.SeedString)} must not be null.");
+                }
+
+                this._seedString = value;
+            }
+        }
+
+        public string AmountString
+        {
+            get
+            {
+                return this._amountString;
+            }
+
+            private set
+            {
+                if (value == null)
+                {
+                    throw new ArgumentNullException($"The {nameof(this.AmountString)} must not be null.");
+                }
+
+                this._amountString = value;
+            }
+        }
+
+        public string DurabilityString
+        {
+            get
+            {
+                return this._durabilityString;
+            }
+
+            private set
+            {
+                if (value == null)
+                {
+                    throw new ArgumentNullException($"The {nameof(this.DurabilityString)} must not be null.");
+                }
+
+                this._durabilityString = value;
             }
         }
 
@@ -97,6 +235,28 @@
                 }
 
                 this._spaceString = value;
+            }
+        }
+
+        public int DataIndex
+        {
+            get
+            {
+                return this.dataIndex;
+            }
+
+            private set
+            {
+                if (value == null)
+                {
+                    throw new ArgumentNullException($"The {nameof(this.DataIndex)} must not be null.");
+                }
+                else if (value.Length != 2)
+                {
+                    throw new ArgumentOutOfRangeException($"The length of {nameof(this.DataIndex)} must be 2.");
+                }
+
+                this.dataIndex = value;
             }
         }
     }
