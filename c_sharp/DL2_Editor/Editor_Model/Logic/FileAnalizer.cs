@@ -7,6 +7,8 @@ namespace Editor_Model.Logic
     using System.Text.RegularExpressions;
     using Editor_Model.EventArgs;
     using Editor_Model.Items;
+    using System.Diagnostics.Metrics;
+    using System.Reflection.Metadata;
 
     public class FileAnalizer
     {
@@ -136,7 +138,7 @@ namespace Editor_Model.Logic
                     break;
                 }
 
-                string[] currentItemIDs = this.FindAmountOfMatches(this.ExtractByteInRange(data, newIndex, data.Length),chunks.Length);
+                (string[] currentItemIDs, int[] currentItemIndizes) = this.FindAmountOfMatches(data, newIndex, chunks.Length);
 
                 // Preparing Mod counter
                 int modCounter = 0;
@@ -145,7 +147,7 @@ namespace Editor_Model.Logic
                 int chunkCounter = 0;
                 InventoryChunk currentInvChunk = chunks[0];
                 byte[] matchBytes = Encoding.UTF8.GetBytes(currentItemID);
-                List<Mod> mods = new List<Mod>(4);
+                List<Mod> mods = new List<Mod>();
 
                 for (int i = 0; i < currentItemIDs.Length; i++)
                 {
@@ -154,18 +156,75 @@ namespace Editor_Model.Logic
                     {
                         currentItemID = currentItemIDs[i];
                         matchBytes = Encoding.UTF8.GetBytes(currentItemIDs[i]);
-                        currentItemIndex = this.FindSequenceIndex(data, 0, matchBytes, false);
+                        currentItemIndex = currentItemIndizes[i];
                         modCounter++;
                         currentInvChunk = chunks[chunkCounter];
                         chunkCounter++;
                     }
+                    // Check if current Item is a Nightrunner Tool
+                    else if (Enum.IsDefined(typeof(NightrunnerToolsEnum), currentItemID) && mods.Count >= 3)
+                    {
+                        byte[] toolData = this.ExtractByteInRange(data, currentItemIndizes[i], currentItemIndizes[i + 12]);
+                        innerItemList.Add(new NightrunnerToolItem(currentItemID.Replace("\x00", "").TrimEnd('\x01'), currentItemIndex, matchBytes.Length, matchBytes, currentInvChunk, mods.ToArray(), toolData));
+                        i += 12;
+                        modCounter = 0;
+                        mods = new List<Mod>(4);
+                    }
+                    // Check if current Item is a weapon
+                    else if (currentItemID.Contains("wpn") && mods.Count >= 3)
+                    {
+                        bool isRanged = false;
+                        // Check if the weapon is a ranged weapon.
+                        foreach (string ranged in Enum.GetNames(typeof(RangedWeaponEnum)))
+                        {
+                            if (currentItemID.Contains(ranged))
+                            {
+                                isRanged = true;
+                                break;
+                            }
+                        }
+
+                        if (isRanged)
+                        {
+                            // Find Index
+                            // The offset between item and mods is always 30!
+                            int currModIndex = currentItemIndex + matchBytes.Length + 30;
+                            for (int j = 0; j < mods.Count; j++)
+                            {
+                                currModIndex += Encoding.UTF8.GetByteCount(mods[j].Name) + mods[j].Data.Length;
+                            }
+
+                            // Offset is the 12 Bytes data and 25 Bytes space
+                            mods.Add(new Mod(currentItemIDs[i], currModIndex, this.ExtractByteInRange(data, currModIndex, currModIndex + 30)));
+                            innerItemList.Add(new WeaponItem(currentItemID.Replace("\x00", "").TrimEnd('\x01'), currentItemIndex, matchBytes.Length, matchBytes, currentInvChunk, mods.ToArray(), new byte[] { }));
+
+                            modCounter = 0;
+                            mods = new List<Mod>();
+                            continue;
+                        }
+
+                        byte[] weaponData = this.ExtractByteInRange(data, currentItemIndizes[i], currentItemIndizes[i + 12]);
+                        innerItemList.Add(new WeaponItem(currentItemID.Replace("\x00", "").TrimEnd('\x01'), currentItemIndex, matchBytes.Length, matchBytes, currentInvChunk, mods.ToArray(), weaponData));
+                        i += 12;
+                        modCounter = 0;
+                        mods = new List<Mod>();
+                    }
+                    // Check for special weapon.
+                    else if (currentItemID.Contains("moc") && mods.Count >= 6)
+                    {
+                        innerItemList.Add(new WeaponItem(currentItemID.Replace("\x00", "").TrimEnd('\x01'), currentItemIndex, matchBytes.Length, matchBytes, currentInvChunk, mods.ToArray(), new byte[] {}));
+
+                        modCounter = 0;
+                        mods = new List<Mod>();
+                        i--;
+                    }
                     // add item when mod counter is full.
-                    else if (modCounter > 4)
+                    else if (modCounter > 4 && !currentItemID.Contains("wpn") && !currentItemID.Contains("moc"))
                     {
                         innerItemList.Add(new InventoryItem(currentItemID.Replace("\x00", "").TrimEnd('\x01'), currentItemIndex, matchBytes.Length, matchBytes, currentInvChunk, mods.ToArray()));
 
                         modCounter = 0;
-                        mods = new List<Mod>(4);
+                        mods = new List<Mod>();
                         i--;
                     }
                     // add mod to mods list
@@ -180,7 +239,7 @@ namespace Editor_Model.Logic
                         }
 
                         // Offset is the 12 Bytes data and 25 Bytes space
-                        mods.Add(new Mod(currentItemIDs[i], this.ExtractByteInRange(data, currModIndex, currModIndex + 30)));
+                        mods.Add(new Mod(currentItemIDs[i], currModIndex, this.ExtractByteInRange(data, currModIndex, currModIndex + 30)));
                         modCounter++;
                     }                    
                 }
@@ -192,35 +251,120 @@ namespace Editor_Model.Logic
                 }
 
                 items.Add(innerItemList.ToArray());
-                index = innerItemList[innerItemList.Count - 1].Index + innerItemList[innerItemList.Count - 1].Size;
+                Mod lastMod = innerItemList[innerItemList.Count - 1].Mod[innerItemList[innerItemList.Count - 1].Mod.Length - 1];
+                index = lastMod.Index + lastMod.Name.Length;
                 index += 75;
             }
 
             return items;
         }
 
-        private string[] FindAmountOfMatches(byte[] data, int amount)
+        private (string[], int[]) FindAmountOfMatches(byte[] content, int startIndex, int amount)
         {
             int counter = 0;
-            List<string> matches = new List<string>();
-            string stringData = Encoding.UTF8.GetString(data);
-            
-            string pattern = @"[A-Za-z0-9_]+";
+            List<string> matchValues = new List<string>();
+            List<int> matchIndices = new List<int>();
+            string stringData = Encoding.UTF8.GetString(this.ExtractByteInRange(content, startIndex, content.Length));
+
+            string pattern = @"[A-Za-z0-9_]*SGDs";
             Match match = Regex.Match(stringData, pattern);
 
-            while (match.Success) 
+            while (match.Success)
             {
-                // amount * 4 since there are 4 mod slots for each item. Even tokens, I mean why not, right?
-                if (counter < amount + amount * 4 && match.Value.Length >= 4)
+                // There are 4 mod slots for each item. Even tokens, I mean why not, right?
+                if (counter <= amount && match.Value.Length >= 4)
                 {
-                    matches.Add(match.Value);
-                    counter++;
+                    // Check if the item is a Nightrunner tool.
+                    bool isNightrunnerTool = Enum.TryParse<NightrunnerToolsEnum>(match.Value, out var nightrunnerTool);
+                    bool isRanged = false;
+                    // Check if the weapon is a ranged weapon.
+                    foreach (string ranged in Enum.GetNames(typeof(RangedWeaponEnum)))
+                    {
+                        if (match.Value.Contains(ranged))
+                        {
+                            isRanged = true;
+                        }
+                    }
+                    
+                    // Check if the item is either a Nightrunner tool or a melee weapon
+                    if (isNightrunnerTool || (match.Value.Contains("wpn") && !isRanged))
+                    {
+                        matchValues.Add(match.Value);
+                        counter++;
+
+                        for (int i = 0; i < 16; i++)
+                        {
+                            match = match.NextMatch();
+                            matchValues.Add(match.Value);
+                        }
+
+                        match = match.NextMatch();
+                        continue;
+                    }
+                    // Check if the item is a ranged weapon.
+                    else if (match.Value.Contains("wpn") && isRanged)
+                    {
+                        matchValues.Add(match.Value);
+                        counter++;
+
+                        for (int i = 0; i < 4; i++)
+                        {
+                            match = match.NextMatch();
+                            matchValues.Add(match.Value);
+                        }
+
+                        match = match.NextMatch();
+                        continue;
+                    }
+                    // Check if the item is the special animation knife.
+                    else if (match.Value.StartsWith("moc"))
+                    {
+                        matchValues.Add(match.Value);
+                        counter++;
+
+                        for (int i = 0; i < 6; i++)
+                        {
+                            match = match.NextMatch();
+                            matchValues.Add(match.Value);
+                        }
+
+                        match = match.NextMatch();
+                        continue;
+                    }
+                    // Check if there are Items or Mods.
+                    else if (match.Value != "NoneSGDs" && !match.Value.Contains("Mod"))
+                    {
+                        counter++;
+                    }
+
+                    matchValues.Add(match.Value);
+                }
+                else
+                {
+                    break;
                 }
 
                 match = match.NextMatch();
             }
 
-            return matches.ToArray();
+            // Remove wrong check
+            matchValues.RemoveAt(matchValues.Count - 1);
+            // Get first index.
+            if (matchValues.Count > 0)
+            {
+                int index = this.FindSequenceIndex(content, startIndex, Encoding.UTF8.GetBytes(matchValues[0]), false);
+                matchIndices.Add(index);
+            }
+
+            // Add the rest of the indices.
+            for (int i = 1; i < matchValues.Count; i++)
+            {
+                byte[] matchBytes = Encoding.UTF8.GetBytes(matchValues[i]);
+                int tempIndex = matchIndices[i - 1] + Encoding.UTF8.GetByteCount(matchValues[i - 1]);
+                matchIndices.Add(this.FindSequenceIndex(content, tempIndex, matchBytes, false));
+            }
+
+            return (matchValues.ToArray(), matchIndices.ToArray());
         }
 
         private UnlockableItems[] AnalizeUnlockableItemsData(byte[] fileContents)
@@ -285,13 +429,12 @@ namespace Editor_Model.Logic
         public (InventoryChunk[], int) FindAllInventoryChunks(byte[] content, int startIndex)
         {
             // Checks if the index is out of range.
-            if (startIndex >= content.Length)
+            if (startIndex > content.Length)
             {
                 throw new ArgumentOutOfRangeException($"The {nameof(startIndex)} must not greater than the content itself.");
             }
 
             List<InventoryChunk> chunks = new List<InventoryChunk>();
-            int index = startIndex;
 
             // Preparing offsets.
             int levelOffset = 2;
@@ -299,72 +442,84 @@ namespace Editor_Model.Logic
             int amountOffset = 4;
             int durabilityOffset = 4;
             int spaceOffset = 25;
-            int sdgOffset = 4;
-            int distanceBetweenSDGs = 75;
-            
-            // Iterates through the content until the parsing is not valid anymore
-            while (true)
+            int dataOffset = levelOffset + seedOffset + amountOffset + durabilityOffset + spaceOffset;
+
+            (string[] matchValues, int[] matchIndizes) = this.GetSGDMatches(content, startIndex);
+
+            for (int i = 0; i < matchValues.Length; i++)
             {
-                // Represents the chunkData and the space to the next SDG.
-                // The data has always the same offset.
-                int dataIndex = index;
+                if (matchIndizes[i] - dataOffset < 0)
+                {
+                    throw new ArgumentOutOfRangeException($"The {nameof(matchIndizes)} at the index {i} must not be negative.");
+                }
+
+                int dataIndex = matchIndizes[i] - dataOffset;
                 byte[] levelData = new byte[] { };
                 byte[] seedData = new byte[] { };
                 byte[] amountData = new byte[] { };
                 byte[] DurabilityData = new byte[] { };
                 byte[] chunkSpace = new byte[] { };
 
-                try
+                // Extracts the content
+                int index = dataIndex;
+                levelData = this.ExtractByteInRange(content, index, index + levelOffset);
+                index += levelOffset;
+                seedData = this.ExtractByteInRange(content, index, index + seedOffset);
+                index += seedOffset;
+                amountData = this.ExtractByteInRange(content, index, index + amountOffset);
+                index += amountOffset;
+                DurabilityData = this.ExtractByteInRange(content, index, index + durabilityOffset);
+                index += durabilityOffset;
+                chunkSpace = this.ExtractByteInRange(content, index, index + spaceOffset);
+
+                chunks.Add(new InventoryChunk(levelData, seedData, amountData, DurabilityData, chunkSpace, dataIndex));
+            }
+
+            // The 4 is for the SDGs name offset.
+            int lastIndex = chunks[chunks.Count - 1].DataIndex + dataOffset + 4;
+            return (chunks.ToArray(), lastIndex);
+        }
+
+        private (string[], int[]) GetSGDMatches(byte[] content, int startIndex)
+        {
+            List<string> matchValues = new List<string>();
+            List<int> matchIndices = new List<int>();
+            string stringData = Encoding.UTF8.GetString(this.ExtractByteInRange(content, startIndex, content.Length));
+
+            string pattern = @"[A-Za-z0-9_]*SGDs";
+            Match match = Regex.Match(stringData, pattern);
+
+            while (match.Success)
+            {
+                // amount * 4 since there are 4 mod slots for each item. Even tokens, I mean why not, right?
+                if (match.Value.Length == 4)
                 {
-                    // Extracts the content
-                    dataIndex = index;
-                    levelData = this.ExtractByteInRange(content, index, index + levelOffset);
-                    index += levelOffset;
-                    seedData = this.ExtractByteInRange(content, index, index + seedOffset);
-                    index += seedOffset;
-                    amountData = this.ExtractByteInRange(content, index, index + amountOffset);
-                    index += amountOffset;
-                    DurabilityData = this.ExtractByteInRange(content, index, index + durabilityOffset);
-                    index += durabilityOffset;
-                    chunkSpace = this.ExtractByteInRange(content, index, index + spaceOffset);
-                    index += spaceOffset;
-
-                    // Checks if after the chunk information follows an SDGs -> {0x53, 0x47, 0x44, 0x73}
-                    if (this.FindSequenceIndex(this.ExtractByteInRange(content, index, index + sdgOffset), 0, new byte[] { 0x53, 0x47, 0x44, 0x73 }, true) != -1)
-                    {
-                        // Checks if the content starts with 0x00 and the space as well 0x00, otherwise wrong SDGs would be included.
-                        if (index > 0 && content[index - 1] == 0x00 && chunkSpace[0] == 0x00)
-                        {
-                            //Console.WriteLine($"{chunks.Count + 1}");
-                            //Console.WriteLine(" ");
-                            //Console.WriteLine("12 Bytes After Jump (Hex):");
-                            //Console.WriteLine(BitConverter.ToString(chunkData).Replace("-", " "));
-                            //Console.WriteLine("25 Bytes After 12 Bytes (Hex):");
-                            //Console.WriteLine(BitConverter.ToString(chunkSpace).Replace("-", " "));
-                            //Console.WriteLine(" ");
-                            //Console.WriteLine($"SDGs found! Offset: {index}");
-                            //Console.WriteLine(" ");
-                            //Console.WriteLine("=======================================================================");
-                            chunks.Add(new InventoryChunk(levelData,seedData,amountData,DurabilityData,chunkSpace, dataIndex));
-                        }
-                    }
-                    else
-                    {
-                        // Need to remove the last parse, since the offset would be off.
-                        index = dataIndex - distanceBetweenSDGs;
-                        break;
-                    }
-
-                    // After the SDG are 75 space. Due to the SDG length from before, we have to add it to the index.
-                    index += distanceBetweenSDGs + sdgOffset;
+                    matchValues.Add(match.Value);
                 }
-                catch (ArgumentOutOfRangeException)
+                else
                 {
                     break;
                 }
+
+                match = match.NextMatch();
             }
 
-            return (chunks.ToArray(), index);
+            // Get first index.
+            if (matchValues.Count > 0)
+            {
+                int index = this.FindSequenceIndex(content, startIndex, Encoding.UTF8.GetBytes(matchValues[0]),false);
+                matchIndices.Add(index);
+            }
+
+            // Add the rest of the indices.
+            for (int i = 1; i < matchValues.Count; i++)
+            {
+                byte[] matchBytes = Encoding.UTF8.GetBytes(matchValues[i]);
+                int tempIndex = matchIndices[i - 1] + Encoding.UTF8.GetByteCount(matchValues[i - 1]);
+                matchIndices.Add(this.FindSequenceIndex(content, tempIndex, matchBytes, false));
+            }
+
+            return (matchValues.ToArray(), matchIndices.ToArray());
         }
 
         /// <summary>

@@ -6,13 +6,16 @@
     {
         private string name;
 
+        private int index;
+
         private byte[] data;
 
         private string dataString;
 
-        public Mod(string name, byte[] data)
+        public Mod(string name, int index, byte[] data)
         {
             this.Name = name;
+            this.Index = index;
             this.Data = data;
         }
 
@@ -31,6 +34,24 @@
                 }
 
                 this.name = value;
+            }
+        }
+
+        public int Index
+        {
+            get
+            {
+                return this.index;
+            }
+
+            private set
+            {
+                if (value < 0)
+                {
+                    throw new ArgumentOutOfRangeException($"The {nameof(this.Index)} must not be negative.");
+                }
+
+                this.index = value;
             }
         }
 

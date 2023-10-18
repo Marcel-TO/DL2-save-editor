@@ -42,7 +42,7 @@ namespace Editor_Model.Items
 
             private set
             {
-                if (value == null && value.Length == 4)
+                if (value == null)
                 {
                     throw new ArgumentNullException($"The {nameof(this.Mod)} must not be null.");
                 }
