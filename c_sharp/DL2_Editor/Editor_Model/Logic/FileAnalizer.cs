@@ -9,6 +9,7 @@ namespace Editor_Model.Logic
     using Editor_Model.Items;
     using System.Diagnostics.Metrics;
     using System.Reflection.Metadata;
+    using System.IO;
 
     public class FileAnalizer
     {
@@ -36,12 +37,6 @@ namespace Editor_Model.Logic
             0x00, 0x07, 0x00, 0x55, 0x6E, 0x6B, 0x6E, 0x6F, 0x77, 0x6E
         };
 
-
-        public FileAnalizer()
-        {
-
-        }
-
         public event EventHandler<ExtractBytesEventArgs> ExtractBytes;
 
         public event EventHandler<FoundMatchesEventArgs> FoundMatches;
@@ -52,6 +47,10 @@ namespace Editor_Model.Logic
 
         public event EventHandler<ReadFileEventArgs> ReadFile;
 
+        /// <summary>
+        /// Reads the content of the file.
+        /// </summary>
+        /// <param name="filePath">The filepath of the selected file.</param>
         public void ReadFileContent(string filePath)
         {
             try
@@ -75,6 +74,11 @@ namespace Editor_Model.Logic
             }
         }
 
+        /// <summary>
+        /// Represents the method for finding all skills inside the save.
+        /// </summary>
+        /// <param name="data">The data of the current save.</param>
+        /// <returns>All found skills.</returns>
         private string[] FindSkillMatches(byte[] data)
         {
             List<string> matches = new List<string>();
@@ -83,6 +87,7 @@ namespace Editor_Model.Logic
             string pattern = @"([A-Za-z0-9_]+_skill)";
             MatchCollection matchCollection = Regex.Matches(stringData, pattern);
 
+            // Iterates through each match.
             foreach (Match match in matchCollection)
             {
                 if (match.Success)
@@ -94,6 +99,13 @@ namespace Editor_Model.Logic
             return matches.ToArray();
         }
 
+        /// <summary>
+        /// Represents the method for analyzing the found skill matches and finds the corresponding index.
+        /// </summary>
+        /// <param name="data">The data of the current save.</param>
+        /// <param name="matches">All skills that match the skill pattern.</param>
+        /// <param name="startingIndex">The starting index of the needed data.</param>
+        /// <returns>All matching skills.</returns>
         private SkillIItem[] AnalizeSkillData(byte[] data, string[] matches, int startingIndex)
         {
             List<SkillIItem> skills = new List<SkillIItem>();
@@ -108,6 +120,11 @@ namespace Editor_Model.Logic
             return skills.ToArray();
         }
 
+        /// <summary>
+        /// Represents a method for loading a savefile and preparing all necessary information.
+        /// </summary>
+        /// <param name="filePath">The filepath of the current selected save.</param>
+        /// <param name="data">The data of the current selected save.</param>
         public void LoadSaveFile(string filePath, byte[] data)
         {
             // find all skills.
@@ -116,31 +133,45 @@ namespace Editor_Model.Logic
             byte[] skillDataRange = this.ExtractByteInRange(data, skillStartIndex, skillEndIndex);
             SkillIItem[] skills = this.AnalizeSkillData(skillDataRange, this.FindSkillMatches(skillDataRange), skillStartIndex);
 
+            // find all unlockable items.
             UnlockableItems[] unlockItems = this.AnalizeUnlockableItemsData(data);
             UnlockableItems lastItem = unlockItems[unlockItems.Length - 1];
 
-            // the space between the SDG IDs and chunk data.
+            // the space between the SGD IDs and chunk data.
             int jumpOffset = lastItem.Index + lastItem.Size + 75;
+
+            // get all items within the inventory.
             List<InventoryItem[]> items = this.GetAllItems(data, jumpOffset);
             this.AnalizedSaveFile?.Invoke(this, new AnalizedSaveFileEventArgs(new SaveFile(filePath, data, BitConverter.ToString(data).Replace("-", " "), items, skills, unlockItems)));
         }
 
+        /// <summary>
+        /// Represents the method for finding all items inside the inventory.
+        /// </summary>
+        /// <param name="data">The data of the current selected save.</param>
+        /// <param name="startIndex">The start index of the inventory data.</param>
+        /// <returns>The list of all different item sections.</returns>
         private List<InventoryItem[]> GetAllItems(byte[] data, int startIndex) {
             List<InventoryItem[]> items = new List<InventoryItem[]>();
             int index = startIndex;
 
             while (true) 
             {
+                // Prepare the inner item section.
                 List<InventoryItem> innerItemList = new List<InventoryItem>();
+                // Find all data chunks for the section.
                 (InventoryChunk[] chunks, int newIndex) = this.FindAllInventoryChunks(data, index);
+
+                // Check if there are no chunks left.
                 if (chunks.Length == 0)
                 {
                     break;
                 }
 
+                // Find the corresponding matches to each chunk (Including Mod data).
                 (string[] currentItemIDs, int[] currentItemIndizes) = this.FindAmountOfMatches(data, newIndex, chunks.Length);
 
-                // Preparing Mod counter
+                // Preparing iteration data.
                 int modCounter = 0;
                 string currentItemID = string.Empty;
                 int currentItemIndex = 0;
@@ -149,107 +180,47 @@ namespace Editor_Model.Logic
                 byte[] matchBytes = Encoding.UTF8.GetBytes(currentItemID);
                 List<Mod> mods = new List<Mod>();
 
+                // Iterate through each found match and validate the position of the match.
                 for (int i = 0; i < currentItemIDs.Length; i++)
                 {
-                    // get current ID
-                    if (modCounter == 0)
+                    // Check if the match is an item or a mod.
+                    if (!currentItemIDs[i].Contains("Mod") && currentItemIDs[i] != "NoneSGDs" && currentItemIDs[i] != "SGDs")
                     {
-                        currentItemID = currentItemIDs[i];
-                        matchBytes = Encoding.UTF8.GetBytes(currentItemIDs[i]);
-                        currentItemIndex = currentItemIndizes[i];
-                        modCounter++;
-                        currentInvChunk = chunks[chunkCounter];
-                        chunkCounter++;
-                    }
-                    // Check if current Item is a Nightrunner Tool
-                    else if (Enum.IsDefined(typeof(NightrunnerToolsEnum), currentItemID) && mods.Count >= 3)
-                    {
-                        byte[] toolData = this.ExtractByteInRange(data, currentItemIndizes[i], currentItemIndizes[i + 12]);
-                        innerItemList.Add(new NightrunnerToolItem(currentItemID.Replace("\x00", "").TrimEnd('\x01'), currentItemIndex, matchBytes.Length, matchBytes, currentInvChunk, mods.ToArray(), toolData));
-                        i += 12;
-                        modCounter = 0;
-                        mods = new List<Mod>(4);
-                    }
-                    // Check if current Item is a weapon
-                    else if (currentItemID.Contains("wpn") && mods.Count >= 3)
-                    {
-                        bool isRanged = false;
-                        // Check if the weapon is a ranged weapon.
-                        foreach (string ranged in Enum.GetNames(typeof(RangedWeaponEnum)))
+                        // Check if the match bullet acts as item or mod.
+                        if (currentItemIDs[i].Contains("Bullet") && modCounter > 0 && modCounter < 4)
                         {
-                            if (currentItemID.Contains(ranged))
-                            {
-                                isRanged = true;
-                                break;
-                            }
-                        }
-
-                        if (isRanged)
-                        {
-                            // Find Index
-                            // The offset between item and mods is always 30!
-                            int currModIndex = currentItemIndex + matchBytes.Length + 30;
-                            for (int j = 0; j < mods.Count; j++)
-                            {
-                                currModIndex += Encoding.UTF8.GetByteCount(mods[j].Name) + mods[j].Data.Length;
-                            }
-
-                            // Offset is the 12 Bytes data and 25 Bytes space
-                            mods.Add(new Mod(currentItemIDs[i], currModIndex, this.ExtractByteInRange(data, currModIndex, currModIndex + 30)));
-                            innerItemList.Add(new WeaponItem(currentItemID.Replace("\x00", "").TrimEnd('\x01'), currentItemIndex, matchBytes.Length, matchBytes, currentInvChunk, mods.ToArray(), new byte[] { }));
-
-                            modCounter = 0;
-                            mods = new List<Mod>();
+                            mods.Add(new Mod(currentItemIDs[i], currentItemIndizes[i], this.ExtractByteInRange(data, currentItemIndizes[i], currentItemIndizes[i] + 30)));
+                            modCounter++;
                             continue;
                         }
 
-                        byte[] weaponData = this.ExtractByteInRange(data, currentItemIndizes[i], currentItemIndizes[i + 12]);
-                        innerItemList.Add(new WeaponItem(currentItemID.Replace("\x00", "").TrimEnd('\x01'), currentItemIndex, matchBytes.Length, matchBytes, currentInvChunk, mods.ToArray(), weaponData));
-                        i += 12;
-                        modCounter = 0;
-                        mods = new List<Mod>();
-                    }
-                    // Check for special weapon.
-                    else if (currentItemID.Contains("moc") && mods.Count >= 6)
-                    {
-                        innerItemList.Add(new WeaponItem(currentItemID.Replace("\x00", "").TrimEnd('\x01'), currentItemIndex, matchBytes.Length, matchBytes, currentInvChunk, mods.ToArray(), new byte[] {}));
+                        // Add the previous item if exists to the list.
+                        if (currentItemID != string.Empty && mods.Count != 0)
+                        {
+                            innerItemList.Add(new InventoryItem(currentItemID.Replace("\x00", "").TrimEnd('\x01'), currentItemIndex, matchBytes.Length, matchBytes, currentInvChunk, mods.ToArray()));
+                            modCounter = 0;
+                            mods.Clear();
+                        }
 
-                        modCounter = 0;
-                        mods = new List<Mod>();
-                        i--;
-                    }
-                    // add item when mod counter is full.
-                    else if (modCounter > 4 && !currentItemID.Contains("wpn") && !currentItemID.Contains("moc"))
-                    {
-                        innerItemList.Add(new InventoryItem(currentItemID.Replace("\x00", "").TrimEnd('\x01'), currentItemIndex, matchBytes.Length, matchBytes, currentInvChunk, mods.ToArray()));
-
-                        modCounter = 0;
-                        mods = new List<Mod>();
-                        i--;
+                        // Set the current item initialization.
+                        currentItemID = currentItemIDs[i];
+                        matchBytes = Encoding.UTF8.GetBytes(currentItemIDs[i]);
+                        currentItemIndex = currentItemIndizes[i];
+                        currentInvChunk = chunks[chunkCounter];
+                        chunkCounter++;
                     }
                     // add mod to mods list
                     else
                     {
-                        // Find Index
-                        // The offset between item and mods is always 30!
-                        int currModIndex = currentItemIndex + matchBytes.Length + 30;
-                        for (int j = 0; j < mods.Count; j++)
-                        {
-                            currModIndex += Encoding.UTF8.GetByteCount(mods[j].Name) + mods[j].Data.Length;
-                        }
-
-                        // Offset is the 12 Bytes data and 25 Bytes space
-                        mods.Add(new Mod(currentItemIDs[i], currModIndex, this.ExtractByteInRange(data, currModIndex, currModIndex + 30)));
+                        mods.Add(new Mod(currentItemIDs[i], currentItemIndizes[i], this.ExtractByteInRange(data, currentItemIndizes[i], currentItemIndizes[i] + 30)));
                         modCounter++;
-                    }                    
+                    }
                 }
 
                 // Add the last item
-                if (modCounter > 4)
-                {
-                    innerItemList.Add(new InventoryItem(currentItemID.Replace("\x00", "").TrimEnd('\x01'), currentItemIndex, matchBytes.Length, matchBytes, currentInvChunk, mods.ToArray()));
-                }
+                innerItemList.Add(new InventoryItem(currentItemID.Replace("\x00", "").TrimEnd('\x01'), currentItemIndex, matchBytes.Length, matchBytes, currentInvChunk, mods.ToArray()));
 
+                // add the inner section to the item list and fix index by offset.
                 items.Add(innerItemList.ToArray());
                 Mod lastMod = innerItemList[innerItemList.Count - 1].Mod[innerItemList[innerItemList.Count - 1].Mod.Length - 1];
                 index = lastMod.Index + lastMod.Name.Length;
@@ -259,85 +230,71 @@ namespace Editor_Model.Logic
             return items;
         }
 
+        /// <summary>
+        /// Represents the method for finding all matches for each chunk.
+        /// </summary>
+        /// <param name="content">The content of the inventory.</param>
+        /// <param name="startIndex">The start index of the search.</param>
+        /// <param name="amount">The amount of chunks found for the current section.</param>
+        /// <returns>A tuple that contains the matches for the current chunk and their corresponding index.</returns>
         private (string[], int[]) FindAmountOfMatches(byte[] content, int startIndex, int amount)
         {
+            // Prepare data for iteration.
             int counter = 0;
+            int modCounter = 0;
             List<string> matchValues = new List<string>();
-            List<int> matchIndices = new List<int>();
+            string currentItem = string.Empty;
             string stringData = Encoding.UTF8.GetString(this.ExtractByteInRange(content, startIndex, content.Length));
 
+            // Finds the first match when comparing it with the pattern.
             string pattern = @"[A-Za-z0-9_]*SGDs";
             Match match = Regex.Match(stringData, pattern);
 
             while (match.Success)
             {
-                // There are 4 mod slots for each item. Even tokens, I mean why not, right?
+                // There are mod slots for each item. Even tokens, I mean why not Techland, right?
+                // Check if the amount of item matches is in range and if the length of the match is at least 4.
                 if (counter <= amount && match.Value.Length >= 4)
                 {
-                    // Check if the item is a Nightrunner tool.
-                    bool isNightrunnerTool = Enum.TryParse<NightrunnerToolsEnum>(match.Value, out var nightrunnerTool);
-                    bool isRanged = false;
-                    // Check if the weapon is a ranged weapon.
-                    foreach (string ranged in Enum.GetNames(typeof(RangedWeaponEnum)))
+                    // Check if it is an item or a mod.
+                    if (!match.Value.Contains("Mod") && match.Value != "NoneSGDs" && match.Value != "SGDs")
                     {
-                        if (match.Value.Contains(ranged))
+                        // Check if the bullet acts as item or mod.
+                        if (match.Value.Contains("Bullet") && modCounter > 0 && modCounter <= 4)
                         {
-                            isRanged = true;
+                            matchValues.Add(match.Value);
+                            match = match.NextMatch();
+                            modCounter++;
+                            continue;
                         }
+
+                        // update data.
+                        counter++;
+                        modCounter = 0;
+                        currentItem = match.Value;
                     }
-                    
-                    // Check if the item is either a Nightrunner tool or a melee weapon
-                    if (isNightrunnerTool || (match.Value.Contains("wpn") && !isRanged))
+                    // Check for the case, that bullet arrow only has 3 NoneSGDs.
+                    // This is only an exception for one specific type of arrow.
+                    else if (currentItem.Contains("Bullet") && match.Value == "SGDs" && modCounter == 4)
+                    {
+                        break;
+                    }
+                    // Checks if the SGDs is at the end of the found list.
+                    else if (match.Value == "SGDs" && modCounter != 4)
+                    {
+                        break;
+                    }
+                    // Checks if the match equals SGDs, since it is also possible for weapon mods.
+                    else if (match.Value == "SGDs") 
                     {
                         matchValues.Add(match.Value);
-                        counter++;
-
-                        for (int i = 0; i < 16; i++)
-                        {
-                            match = match.NextMatch();
-                            matchValues.Add(match.Value);
-                        }
-
                         match = match.NextMatch();
                         continue;
                     }
-                    // Check if the item is a ranged weapon.
-                    else if (match.Value.Contains("wpn") && isRanged)
-                    {
-                        matchValues.Add(match.Value);
-                        counter++;
 
-                        for (int i = 0; i < 4; i++)
-                        {
-                            match = match.NextMatch();
-                            matchValues.Add(match.Value);
-                        }
-
-                        match = match.NextMatch();
-                        continue;
-                    }
-                    // Check if the item is the special animation knife.
-                    else if (match.Value.StartsWith("moc"))
-                    {
-                        matchValues.Add(match.Value);
-                        counter++;
-
-                        for (int i = 0; i < 6; i++)
-                        {
-                            match = match.NextMatch();
-                            matchValues.Add(match.Value);
-                        }
-
-                        match = match.NextMatch();
-                        continue;
-                    }
-                    // Check if there are Items or Mods.
-                    else if (match.Value != "NoneSGDs" && !match.Value.Contains("Mod"))
-                    {
-                        counter++;
-                    }
-
+                    // Add the match to the values and update counter.
                     matchValues.Add(match.Value);
+                    modCounter++;
                 }
                 else
                 {
@@ -347,26 +304,44 @@ namespace Editor_Model.Logic
                 match = match.NextMatch();
             }
 
-            // Remove wrong check
-            matchValues.RemoveAt(matchValues.Count - 1);
+            int[] matchIndices = this.GetIndicesFromValues(content, startIndex, matchValues.ToArray());
+            return (matchValues.ToArray(), matchIndices);
+        }
+
+        /// <summary>
+        /// Represents a method for finding the indices for each matching value.
+        /// </summary>
+        /// <param name="content">The data of the save.</param>
+        /// <param name="startIndex">The startIndex of the inventory</param>
+        /// <param name="values">The matching values of the items.</param>
+        /// <returns>The indices for each matching value.</returns>
+        private int[] GetIndicesFromValues(byte[] content, int startIndex, string[] values)
+        {
+            List<int> matchIndices = new List<int>();
+
             // Get first index.
-            if (matchValues.Count > 0)
+            if (values.Length > 0)
             {
-                int index = this.FindSequenceIndex(content, startIndex, Encoding.UTF8.GetBytes(matchValues[0]), false);
+                int index = this.FindSequenceIndex(content, startIndex, Encoding.UTF8.GetBytes(values[0]), false);
                 matchIndices.Add(index);
             }
 
             // Add the rest of the indices.
-            for (int i = 1; i < matchValues.Count; i++)
+            for (int i = 1; i < values.Length; i++)
             {
-                byte[] matchBytes = Encoding.UTF8.GetBytes(matchValues[i]);
-                int tempIndex = matchIndices[i - 1] + Encoding.UTF8.GetByteCount(matchValues[i - 1]);
+                byte[] matchBytes = Encoding.UTF8.GetBytes(values[i]);
+                int tempIndex = matchIndices[i - 1] + Encoding.UTF8.GetByteCount(values[i - 1]);
                 matchIndices.Add(this.FindSequenceIndex(content, tempIndex, matchBytes, false));
             }
 
-            return (matchValues.ToArray(), matchIndices.ToArray());
+            return matchIndices.ToArray();
         }
 
+        /// <summary>
+        /// Represents a method for analyzing and extracting the data for each unlockable item.
+        /// </summary>
+        /// <param name="fileContents">The data of the save.</param>
+        /// <returns>All unlockable items inside the inventory.</returns>
         private UnlockableItems[] AnalizeUnlockableItemsData(byte[] fileContents)
         {
             // Finds all inventory sequences inside the file.
@@ -414,9 +389,6 @@ namespace Editor_Model.Logic
 
             // Sort the itemlist, so that the last entry is at the end
             UnlockableItems[] sortedItems = items.OrderBy(x => x.Index).ToArray();
-            //Console.WriteLine(BitConverter.ToString(sortedItems[sortedItems.Length - 1].SdgData).Replace("-", " "));
-            //Console.WriteLine($"Summary -> {sortedItems.Length} SDGs where found");
-
             return sortedItems;
         }
 
@@ -444,8 +416,16 @@ namespace Editor_Model.Logic
             int spaceOffset = 25;
             int dataOffset = levelOffset + seedOffset + amountOffset + durabilityOffset + spaceOffset;
 
+            // Finding all SGD matches and their corresponding indices.
             (string[] matchValues, int[] matchIndizes) = this.GetSGDMatches(content, startIndex);
 
+            // Check if no matches where found.
+            if (matchValues.Length == 0)
+            {
+                return (chunks.ToArray(), -1);
+            }
+
+            // Iterate through each value and get the needed 12 Bytes of data.
             for (int i = 0; i < matchValues.Length; i++)
             {
                 if (matchIndizes[i] - dataOffset < 0)
@@ -480,10 +460,16 @@ namespace Editor_Model.Logic
             return (chunks.ToArray(), lastIndex);
         }
 
+        /// <summary>
+        /// Represents a method for finding all sgd matches inside the range.
+        /// </summary>
+        /// <param name="content">The data of the current save.</param>
+        /// <param name="startIndex">The index from where the search starts.</param>
+        /// <returns>The matching vales and their corresponding indices.</returns>
         private (string[], int[]) GetSGDMatches(byte[] content, int startIndex)
         {
+            // Preparing data.
             List<string> matchValues = new List<string>();
-            List<int> matchIndices = new List<int>();
             string stringData = Encoding.UTF8.GetString(this.ExtractByteInRange(content, startIndex, content.Length));
 
             string pattern = @"[A-Za-z0-9_]*SGDs";
@@ -491,7 +477,7 @@ namespace Editor_Model.Logic
 
             while (match.Success)
             {
-                // amount * 4 since there are 4 mod slots for each item. Even tokens, I mean why not, right?
+                // Looking for all SGDs inside the current chunk.
                 if (match.Value.Length == 4)
                 {
                     matchValues.Add(match.Value);
@@ -504,22 +490,46 @@ namespace Editor_Model.Logic
                 match = match.NextMatch();
             }
 
-            // Get first index.
-            if (matchValues.Count > 0)
+            int[] matchIndices = this.GetIndicesFromValues(content, startIndex, matchValues.ToArray());
+
+            // Check if Savegame section is between the start and the first SGDs.
+            bool isSavegame = false;
+            int firstIndex = 0;
+            if (matchValues.Count > 1)
             {
-                int index = this.FindSequenceIndex(content, startIndex, Encoding.UTF8.GetBytes(matchValues[0]),false);
-                matchIndices.Add(index);
+                firstIndex = matchIndices[0];
             }
 
-            // Add the rest of the indices.
-            for (int i = 1; i < matchValues.Count; i++)
+            isSavegame = this.IsSavegameBetween(content, startIndex, firstIndex);
+
+            // Reset matches if savegame is between.
+            if (isSavegame)
             {
-                byte[] matchBytes = Encoding.UTF8.GetBytes(matchValues[i]);
-                int tempIndex = matchIndices[i - 1] + Encoding.UTF8.GetByteCount(matchValues[i - 1]);
-                matchIndices.Add(this.FindSequenceIndex(content, tempIndex, matchBytes, false));
+                matchValues.Clear();
+                matchIndices = new int[] {};
             }
 
-            return (matchValues.ToArray(), matchIndices.ToArray());
+            return (matchValues.ToArray(), matchIndices);
+        }
+
+        /// <summary>
+        /// Represents a method for checking, whether savegame is between the items.
+        /// </summary>
+        /// <param name="data">The content of the current save.</param>
+        /// <param name="startIndex">The starting index of the query.</param>
+        /// <param name="endIndex">The ending index of the query.</param>
+        /// <returns>Indicates whether savegame is between the items or not.</returns>
+        private bool IsSavegameBetween(byte[] data, int startIndex, int endIndex)
+        {
+            byte[] targetData = this.ExtractByteInRange(data, startIndex, endIndex);
+            int index = this.FindSequenceIndex(targetData, 0, Encoding.UTF8.GetBytes("Savegame"), false);
+
+            if (index < 0)
+            {
+                return false;
+            }
+
+            return true;
         }
 
         /// <summary>
