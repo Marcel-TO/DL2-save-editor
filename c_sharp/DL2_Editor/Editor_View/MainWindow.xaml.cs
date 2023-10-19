@@ -97,6 +97,9 @@
                     case PageNameEnum.PlayerPage:
                         pageContent.Navigate(new PlayerPage(this.DataContext));
                         break;
+                    case PageNameEnum.IdOverviewPage:
+                        pageContent.Navigate(new IdOverviewPage(this.DataContext));
+                        break;
                 }
                 
             }

@@ -18,6 +18,8 @@
 
         public string PlayerLabel => "Spieler";
 
+        public string IdLabel => "IDs";
+
         public string BaseSkillsLabel => "Basis Skills";
 
         public string LegendSkillsLabel => "Legenden Skills";

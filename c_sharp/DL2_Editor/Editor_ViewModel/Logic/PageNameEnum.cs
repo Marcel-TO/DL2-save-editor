@@ -8,6 +8,7 @@
         InventoryPage,
         BackpackPage,
         CampaignPage,
-        PlayerPage
+        PlayerPage,
+        IdOverviewPage
     }
 }

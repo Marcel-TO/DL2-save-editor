@@ -7,6 +7,9 @@
     </ApplicationDefinition>
   </ItemGroup>
   <ItemGroup>
+    <Compile Update="Views\IdOverviewPage.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Update="Views\InfoPage.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -19,6 +22,9 @@
       <SubType>Designer</SubType>
     </Page>
     <Page Update="Views\BackpackPage.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="Views\IdOverviewPage.xaml">
       <SubType>Designer</SubType>
     </Page>
     <Page Update="Views\InfoPage.xaml">

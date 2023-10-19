@@ -18,6 +18,8 @@
 
         string PlayerLabel { get; }
 
+        string IdLabel { get; }
+
         string BaseSkillsLabel { get; }
 
         string LegendSkillsLabel { get; }

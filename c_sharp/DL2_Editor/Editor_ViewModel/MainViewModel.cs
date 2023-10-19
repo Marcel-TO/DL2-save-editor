@@ -23,6 +23,10 @@
 
         private SaveFile saveFile;
 
+        private IdSearcherVM idSearcher;
+
+        private IdData[] idData;
+
         public MainViewModel()
         {
             this.supportedLanguages = this.CreateSupportedLanguages();
@@ -32,6 +36,9 @@
             this.FileAnalizer = new FileAnalizerVM();
             this.FileAnalizer.AnalizedSaveFile += this.OnAnalizedFile;
             this.FileAnalizer.ErrorMessage += this.OnErrorMessage;
+            this.IdSearcher = new IdSearcherVM();
+            this.IdSearcher.OnIdSearch += this.OnIdSearch;
+            this.IdSearcher.GetIDs();
 
             this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(this.FileContents)));
         }
@@ -130,6 +137,42 @@
             }
         }
 
+        public IdData[] IdData
+        {
+            get
+            {
+                return this.idData;
+            }
+            set
+            {
+                if (value == null)
+                {
+                    throw new ArgumentNullException($"The {nameof(this.IdData)} must not be null!");
+                }
+
+                this.idData = value;
+                this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(this.IdData)));
+            }
+        }
+
+        public IdSearcherVM IdSearcher
+        {
+            get
+            {
+                return this.idSearcher;
+            }
+            set
+            {
+                if (value == null)
+                {
+                    throw new ArgumentNullException($"The {nameof(this.IdSearcher)} must not be null!");
+                }
+
+                this.idSearcher = value;
+                this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(this.IdSearcher)));
+            }
+        }
+
         public bool IsSaveFileNull
         {
             get
@@ -221,6 +264,13 @@
             this.SaveFile = e.SaveFile;
             this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(this.SaveFile)));
             this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(this.FileContents)));
+        }
+
+        protected void OnIdSearch(object sender, FoundIDsEventArgs e)
+        {
+            this.IdData = e.IdData;
+            this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(this.IdData)));
+
         }
 
         private ObservableCollection<ILanguageDisplay> CreateSupportedLanguages()

@@ -183,11 +183,12 @@ namespace Editor_Model.Logic
                 // Iterate through each found match and validate the position of the match.
                 for (int i = 0; i < currentItemIDs.Length; i++)
                 {
+                    var test = currentItemIDs[i];
                     // Check if the match is an item or a mod.
-                    if (!currentItemIDs[i].Contains("Mod") && currentItemIDs[i] != "NoneSGDs" && currentItemIDs[i] != "SGDs")
+                    if (!currentItemIDs[i].Contains("Mod") && !currentItemIDs[i].Contains("charm") && currentItemIDs[i] != "NoneSGDs" && currentItemIDs[i] != "SGDs")
                     {
-                        // Check if the match bullet acts as item or mod.
-                        if (currentItemIDs[i].Contains("Bullet") && modCounter > 0 && modCounter < 4)
+                        // Check if the bullet acts as item or mod or if there is a transmog item.
+                        if ((currentItemIDs[i].Contains("Bullet") && modCounter > 0 && modCounter < 4) || modCounter == 3)
                         {
                             mods.Add(new Mod(currentItemIDs[i], currentItemIndizes[i], this.ExtractByteInRange(data, currentItemIndizes[i], currentItemIndizes[i] + 30)));
                             modCounter++;
@@ -249,6 +250,7 @@ namespace Editor_Model.Logic
             // Finds the first match when comparing it with the pattern.
             string pattern = @"[A-Za-z0-9_]*SGDs";
             Match match = Regex.Match(stringData, pattern);
+            Match savegameMatch = Regex.Match(stringData, "Savegame");
 
             while (match.Success)
             {
@@ -257,10 +259,10 @@ namespace Editor_Model.Logic
                 if (counter <= amount && match.Value.Length >= 4)
                 {
                     // Check if it is an item or a mod.
-                    if (!match.Value.Contains("Mod") && match.Value != "NoneSGDs" && match.Value != "SGDs")
+                    if (!match.Value.Contains("Mod") && !match.Value.Contains("charm") && match.Value != "NoneSGDs" && match.Value != "SGDs")
                     {
                         // Check if the bullet acts as item or mod.
-                        if (match.Value.Contains("Bullet") && modCounter > 0 && modCounter <= 4)
+                        if ((match.Value.Contains("Bullet") && modCounter > 0 && modCounter <= 4) || modCounter == 4)
                         {
                             matchValues.Add(match.Value);
                             match = match.NextMatch();
@@ -273,12 +275,6 @@ namespace Editor_Model.Logic
                         modCounter = 0;
                         currentItem = match.Value;
                     }
-                    // Check for the case, that bullet arrow only has 3 NoneSGDs.
-                    // This is only an exception for one specific type of arrow.
-                    else if (currentItem.Contains("Bullet") && match.Value == "SGDs" && modCounter == 4)
-                    {
-                        break;
-                    }
                     // Checks if the SGDs is at the end of the found list.
                     else if (match.Value == "SGDs" && modCounter != 4)
                     {
@@ -287,6 +283,12 @@ namespace Editor_Model.Logic
                     // Checks if the match equals SGDs, since it is also possible for weapon mods.
                     else if (match.Value == "SGDs") 
                     {
+                        // Check if Savegame indicator is between
+                        if (savegameMatch.Index < match.Index)
+                        {
+                            break;
+                        }
+
                         matchValues.Add(match.Value);
                         match = match.NextMatch();
                         continue;

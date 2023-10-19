@@ -55,7 +55,7 @@
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="50"/>
+                <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
 
             <Grid.Background>
@@ -146,7 +146,7 @@
                 </Grid>
             </Border>
 
-            <!-- Top Section: 5 Buttons -->
+            <!-- Top Section: -->
             <StackPanel Grid.ColumnSpan="4" Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Center" Grid.Row="1" Height="50">
                 <Button Content="{Binding SelectedLanguage.SkillLabel}" Width="100" Cursor="Hand" Click="ChangeToPage" Tag="{x:Static logic:PageNameEnum.SkillPage}" Style="{StaticResource NavbarButtons}"/>
                 <Button Content="{Binding SelectedLanguage.ExperienceLabel}" Width="100" Cursor="Hand" Click="ChangeToPage" Tag="{x:Static logic:PageNameEnum.ExperiencePage}" Style="{StaticResource NavbarButtons}"/>
@@ -154,6 +154,7 @@
                 <Button Content="{Binding SelectedLanguage.BackpackLabel}" Width="100" Cursor="Hand" Click="ChangeToPage" Tag="{x:Static logic:PageNameEnum.BackpackPage}" Style="{StaticResource NavbarButtons}"/>
                 <Button Content="{Binding SelectedLanguage.CampaignLabel}" Width="100" Cursor="Hand" Click="ChangeToPage" Tag="{x:Static logic:PageNameEnum.CampaignPage}" Style="{StaticResource NavbarButtons}"/>
                 <Button Content="{Binding SelectedLanguage.PlayerLabel}" Width="100" Cursor="Hand" Click="ChangeToPage" Tag="{x:Static logic:PageNameEnum.PlayerPage}" Style="{StaticResource NavbarButtons}"/>
+                <Button Content="{Binding SelectedLanguage.IdLabel}" Width="100" Cursor="Hand" Click="ChangeToPage" Tag="{x:Static logic:PageNameEnum.IdOverviewPage}" Style="{StaticResource NavbarButtons}"/>
             </StackPanel>
 
 
@@ -227,8 +228,6 @@
                     </Grid>
                 </StackPanel>
             </Popup>
-
-
 
             <Frame Grid.Row="2" Grid.ColumnSpan="3" x:Name="pageContent" NavigationUIVisibility="Hidden" />
         </Grid>

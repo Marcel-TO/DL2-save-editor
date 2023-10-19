@@ -10,11 +10,11 @@ none
 false
 TRACE;DEBUG;NET;NET6_0;NETCOREAPP
 M:\Marcel\Desktop\GitHub\DL2-save-editor\c_sharp\DL2_Editor\Editor_View\App.xaml
-8-758995996
+92081718603
 
-111470844586
+12580636196
 196198743395
-MainWindow.xaml;Views\BackpackPage.xaml;Views\CampaignPage.xaml;Views\ExperiencePage.xaml;Views\InfoPage.xaml;Views\InventoryPage.xaml;Views\PlayerPage.xaml;Views\SkillsPage.xaml;
+MainWindow.xaml;Views\BackpackPage.xaml;Views\CampaignPage.xaml;Views\ExperiencePage.xaml;Views\IdOverviewPage.xaml;Views\InfoPage.xaml;Views\InventoryPage.xaml;Views\PlayerPage.xaml;Views\SkillsPage.xaml;
 
 False
 

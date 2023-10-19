@@ -18,6 +18,8 @@
 
         public string PlayerLabel => "Jugador";
 
+        public string IdLabel => "IDs";
+
         public string BaseSkillsLabel => "Habilidades básicas";
 
         public string LegendSkillsLabel => "Habilidades de leyenda";
