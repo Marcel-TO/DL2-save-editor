@@ -9,7 +9,7 @@ namespace Editor_Model.Items
 
         private Mod[] mod;
 
-        public InventoryItem(string name, int index, int size, byte[] sdgData, InventoryChunk chunkData, Mod[] mod) : base(name, index, size, sdgData)
+        public InventoryItem(string name, int index, int size, byte[] sgdData, InventoryChunk chunkData, Mod[] mod) : base(name, index, size, sgdData)
         {
             this.ChunkData = chunkData;
             this.Mod = mod;

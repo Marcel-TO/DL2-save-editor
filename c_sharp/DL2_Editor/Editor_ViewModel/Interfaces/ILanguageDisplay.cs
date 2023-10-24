@@ -45,5 +45,7 @@
         string FileLabel { get; }
 
         string SizeLabel { get; }
+
+        string ToBeContinuedLabel { get; }
     }
 }

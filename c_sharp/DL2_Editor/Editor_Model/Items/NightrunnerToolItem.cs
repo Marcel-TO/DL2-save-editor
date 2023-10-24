@@ -6,7 +6,7 @@
     public class NightrunnerToolItem : InventoryItem
     {
         private byte[] _toolData;
-        public NightrunnerToolItem(string name, int index, int size, byte[] sdgData, InventoryChunk chunkData, Mod[] mod, byte[] toolData) : base(name, index, size, sdgData, chunkData, mod)
+        public NightrunnerToolItem(string name, int index, int size, byte[] sgdData, InventoryChunk chunkData, Mod[] mod, byte[] toolData) : base(name, index, size, sgdData, chunkData, mod)
         {
             this.ToolData = toolData;
         }

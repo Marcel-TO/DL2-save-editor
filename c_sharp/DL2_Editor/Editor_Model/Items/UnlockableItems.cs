@@ -5,7 +5,7 @@
 
     public class UnlockableItems : BaseItem
     {
-        public UnlockableItems(string name, int index, int size, byte[] sdgData) : base(name, index, size, sdgData)
+        public UnlockableItems(string name, int index, int size, byte[] sgdData) : base(name, index, size, sgdData)
         {
         }
     }

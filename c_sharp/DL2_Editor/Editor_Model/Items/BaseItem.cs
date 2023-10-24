@@ -11,16 +11,16 @@
 
         private int _size;
 
-        private byte[] _sdgData;
+        private byte[] _sgdData;
 
-        private string _sdgString;
+        private string _sgdString;
 
-        public BaseItem(string name, int index, int size, byte[] sdgData)
+        public BaseItem(string name, int index, int size, byte[] sgdData)
         {
             this.Name = name;
             this.Index = index;
             this.Size = size;
-            this.SdgData = sdgData;
+            this.SgdData = sgdData;
         }
 
         public string Name
@@ -77,40 +77,40 @@
             }
         }
 
-        public byte[] SdgData
+        public byte[] SgdData
         {
             get
             {
-                return this._sdgData;
+                return this._sgdData;
             }
 
             private set
             {
                 if (value == null)
                 {
-                    throw new ArgumentNullException($"The {nameof(this.SdgData)} must not be null.");
+                    throw new ArgumentNullException($"The {nameof(this.SgdData)} must not be null.");
                 }
 
-                this._sdgData = value;
-                this.SdgString = BitConverter.ToString(value).Replace("-", " ");
+                this._sgdData = value;
+                this.SgdString = BitConverter.ToString(value).Replace("-", " ");
             }
         }
 
-        public string SdgString
+        public string SgdString
         {
             get
             {
-                return this._sdgString;
+                return this._sgdString;
             }
 
             private set
             {
                 if (value == null)
                 {
-                    throw new ArgumentNullException($"The {nameof(this.SdgString)} must not be null.");
+                    throw new ArgumentNullException($"The {nameof(this.SgdString)} must not be null.");
                 }
 
-                this._sdgString = value;
+                this._sgdString = value;
             }
         }
     }

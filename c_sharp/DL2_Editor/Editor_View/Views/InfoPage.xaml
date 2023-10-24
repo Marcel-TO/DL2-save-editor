@@ -29,15 +29,28 @@
             HorizontalAlignment="Center"
             VerticalAlignment="Center"
             TextWrapping="Wrap"
-            Text="Hello there fellow Nightrunner"/>
+            Text="{Binding SelectedLanguage.InfoPageTitle}"/>
 
-        <TextBlock 
-            Grid.Row="1"
-            Background="Transparent"
-            Foreground="#e9eecd"
-            FontSize="15"
-            TextWrapping="Wrap"
-            HorizontalAlignment="Center"
-            Text="{Binding SelectedLanguage.InfoPageIntroductionText}"/>
+        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+            <StackPanel>
+                <TextBlock 
+                    Margin="0 20"
+                    Background="Transparent"
+                    Foreground="#e9eecd"
+                    FontSize="15"
+                    TextWrapping="Wrap"
+                    HorizontalAlignment="Center"
+                    Text="{Binding SelectedLanguage.InfoPageIntroductionText}"/>
+
+                <TextBlock 
+                    Margin="0 20"
+                    Background="Transparent"
+                    Foreground="#e9eecd"
+                    FontSize="15"
+                    TextWrapping="Wrap"
+                    HorizontalAlignment="Center"
+                    Text="{Binding SelectedLanguage.InfoPageIntroductionText}"/>
+            </StackPanel>
+        </ScrollViewer>
     </Grid>
 </Page>

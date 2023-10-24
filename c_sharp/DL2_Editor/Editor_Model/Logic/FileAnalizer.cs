@@ -385,8 +385,8 @@ namespace Editor_Model.Logic
                 int currentIndex = matchingStringIndizes[i] + startIndex;
                 int size = Encoding.UTF8.GetBytes(cleanString).Length;
                 // Console.WriteLine($"Index/Offset: {currentIndex}, Size: {size}, String: {cleanString}");
-                byte[] sdg = this.ExtractByteInRange(inventoryData, matchingStringIndizes[i], matchingStringIndizes[i] + size);
-                items.Add(new UnlockableItems(cleanString, currentIndex, size, sdg));
+                byte[] sgd = this.ExtractByteInRange(inventoryData, matchingStringIndizes[i], matchingStringIndizes[i] + size);
+                items.Add(new UnlockableItems(cleanString, currentIndex, size, sgd));
             }
 
             // Sort the itemlist, so that the last entry is at the end
@@ -395,7 +395,7 @@ namespace Editor_Model.Logic
         }
 
         /// <summary>
-        /// Represents a method for finding all SDG chunks inside the inventory.
+        /// Represents a method for finding all SGD chunks inside the inventory.
         /// </summary>
         /// <param name="content">The content of the current save file.</param>
         /// <param name="startIndex">The starting index on where the search begins.</param>
@@ -457,7 +457,7 @@ namespace Editor_Model.Logic
                 chunks.Add(new InventoryChunk(levelData, seedData, amountData, DurabilityData, chunkSpace, dataIndex));
             }
 
-            // The 4 is for the SDGs name offset.
+            // The 4 is for the SGDs name offset.
             int lastIndex = chunks[chunks.Count - 1].DataIndex + dataOffset + 4;
             return (chunks.ToArray(), lastIndex);
         }

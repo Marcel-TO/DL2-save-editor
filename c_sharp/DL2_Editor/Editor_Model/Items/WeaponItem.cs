@@ -7,7 +7,7 @@
     {
         private byte[] _weaponData;
 
-        public WeaponItem(string name, int index, int size, byte[] sdgData, InventoryChunk chunkData, Mod[] mod, byte[] weaponData) : base(name, index, size, sdgData, chunkData, mod)
+        public WeaponItem(string name, int index, int size, byte[] sgdData, InventoryChunk chunkData, Mod[] mod, byte[] weaponData) : base(name, index, size, sgdData, chunkData, mod)
         {
             this.WeaponData = weaponData;
         }

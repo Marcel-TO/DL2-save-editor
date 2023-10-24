@@ -51,5 +51,7 @@
         public string FileLabel => "Datei";
 
         public string SizeLabel => "Größe";
+
+        public string ToBeContinuedLabel => "Fortsetzung folgt.....";
     }
 }

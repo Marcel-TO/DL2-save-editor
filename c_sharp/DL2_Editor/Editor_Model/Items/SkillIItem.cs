@@ -9,7 +9,7 @@
 
         private string _pointsString;
 
-        public SkillIItem(string name, int index, int size, byte[] sdgData, byte[] points) : base(name, index, size, sdgData)
+        public SkillIItem(string name, int index, int size, byte[] sgdData, byte[] points) : base(name, index, size, sgdData)
         {
             this.Points = points;
         }
