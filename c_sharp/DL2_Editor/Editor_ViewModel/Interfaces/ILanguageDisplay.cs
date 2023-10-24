@@ -47,5 +47,7 @@
         string SizeLabel { get; }
 
         string ToBeContinuedLabel { get; }
+
+        string ChangeLabel { get; }
     }
 }

@@ -53,5 +53,7 @@
         public string SizeLabel => "Talla";
 
         public string ToBeContinuedLabel => "Continuación......";
+
+        public string ChangeLabel => "Cambiar";
     }
 }

@@ -43,3 +43,4 @@ M:\Marcel\Desktop\GitHub\DL2-save-editor\c_sharp\DL2_Editor\Editor_View\obj\Debu
 M:\Marcel\Desktop\GitHub\DL2-save-editor\c_sharp\DL2_Editor\Editor_View\obj\Debug\net6.0-windows\Views\BackpackPage.baml
 M:\Marcel\Desktop\GitHub\DL2-save-editor\c_sharp\DL2_Editor\Editor_View\obj\Debug\net6.0-windows\Views\IdOverviewPage.g.cs
 M:\Marcel\Desktop\GitHub\DL2-save-editor\c_sharp\DL2_Editor\Editor_View\obj\Debug\net6.0-windows\Views\IdOverviewPage.baml
+M:\Marcel\Desktop\GitHub\DL2-save-editor\c_sharp\DL2_Editor\Editor_View\obj\Debug\net6.0-windows\GeneratedInternalTypeHelper.g.cs

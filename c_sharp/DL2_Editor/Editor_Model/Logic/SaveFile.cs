@@ -15,9 +15,9 @@
 
         private List<InventoryItem[]> items;
 
-        private SkillIItem[] skills;
+        private Skills skills;
 
-        public SaveFile(string filepath, byte[] fileData, string fileContent, List<InventoryItem[]> items, SkillIItem[] skills, UnlockableItems[] unlockableItems)
+        public SaveFile(string filepath, byte[] fileData, string fileContent, List<InventoryItem[]> items, Skills skills, UnlockableItems[] unlockableItems)
         {
             this.Path = filepath;
             this.FileData = fileData;
@@ -52,7 +52,7 @@
                 return this.fileData;
             }
 
-            private set
+            set
             {
                 if (value == null)
                 {
@@ -88,7 +88,7 @@
                 return this.items;
             }
 
-            private set
+            set
             {
                 if (value == null)
                 {
@@ -106,7 +106,7 @@
                 return this.unlockableItems;
             }
 
-            private set
+            set
             {
                 if (value == null)
                 {
@@ -117,14 +117,14 @@
             }
         }
 
-        public SkillIItem[] Skills
+        public Skills Skills
         {
             get
             {
                 return this.skills;
             }
 
-            private set
+            set
             {
                 if (value == null)
                 {

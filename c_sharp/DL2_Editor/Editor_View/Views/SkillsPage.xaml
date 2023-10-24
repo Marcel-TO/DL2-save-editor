@@ -5,6 +5,7 @@
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
       xmlns:local="clr-namespace:Editor_View.Views"
       xmlns:vm="clr-namespace:Editor_ViewModel;assembly=Editor_ViewModel"
+      xmlns:converter="clr-namespace:Editor_View.Converters"
       mc:Ignorable="d" 
       d:DesignHeight="450" d:DesignWidth="800"
       Title="SkillsPage">
@@ -12,6 +13,29 @@
     <Page.DataContext>
         <vm:MainViewModel/>
     </Page.DataContext>
+
+    <Page.Resources>
+        <converter:HexValidationRule x:Key="hexValidationRule"/>
+        <converter:HexConverter x:Key="hexConverter"/>
+        <converter:ChangedDataValueConverter x:Key="changedValueConverter"/>
+
+        <ControlTemplate x:Key="ValidationTemplate">
+            <DockPanel>
+                <TextBlock Foreground="Red" FontSize="20">!</TextBlock>
+                <AdornedElementPlaceholder/>
+            </DockPanel>
+        </ControlTemplate>
+
+        <Style x:Key="TextBoxInError" TargetType="{x:Type TextBox}">
+            <Style.Triggers>
+                <Trigger Property="Validation.HasError" Value="true">
+                    <Setter Property="ToolTip"
+              Value="{Binding RelativeSource={x:Static RelativeSource.Self},
+                              Path=(Validation.Errors)[0].ErrorContent}"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+    </Page.Resources>
 
 
     <Grid>
@@ -55,14 +79,189 @@
                 <!-- TabItem 1 -->
                 <TabItem Header="{Binding SelectedLanguage.BaseSkillsLabel}">
                     <ListView
-                      Name="skillItems" 
+                      Name="baseSkillItems" 
+                      Margin="10" 
+                      Width="Auto" 
+                      Background="Transparent" 
+                      Foreground="#e9eecd"
+                      BorderBrush="#e9eecd"
+                      ItemsSource="{Binding SaveFile.Skills.BaseSkills, UpdateSourceTrigger=PropertyChanged}">
+                        <ListView.View>
+                            <GridView AllowsColumnReorder="true" ColumnHeaderToolTip="Skill Information">
+                                <GridView.ColumnHeaderContainerStyle>
+                                    <Style TargetType="{x:Type GridViewColumnHeader}">
+                                        <Setter Property="Background" Value="#e9eecd"/>
+                                        <Setter Property="Foreground" Value="Black"/>
+                                        <Style.Triggers>
+                                            <!-- TabItem style for hovered state -->
+                                            <Trigger Property="IsMouseOver" Value="True">
+                                                <Setter Property="Foreground" Value="#455450"/>
+                                                <Setter Property="FontWeight" Value="Bold"/>
+                                            </Trigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </GridView.ColumnHeaderContainerStyle>
+
+                                <GridViewColumn DisplayMemberBinding="{Binding Name}" Width="250">
+                                    <GridViewColumn.Header>Name</GridViewColumn.Header>
+                                    <GridViewColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <TextBlock Text="{Binding Name}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                        </DataTemplate>
+                                    </GridViewColumn.CellTemplate>
+                                </GridViewColumn>
+                                <GridViewColumn Header="Value" Width="150">
+                                    <GridViewColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                                                <TextBlock Text="{Binding PointsString}" HorizontalAlignment="Stretch" VerticalAlignment="Center" Width="50"/>
+                                                <ToggleButton x:Name="ChangeValue"
+                                                              Cursor="Hand"
+                                                              Content="{Binding Path=DataContext.SelectedLanguage.ChangeLabel, RelativeSource={RelativeSource AncestorType=TabControl}}" 
+                                                              HorizontalAlignment="Stretch" 
+                                                              Margin="5 0"
+                                                              Padding="5"
+                                                              Background="#e9eecd"
+                                                              Foreground="Black">
+                                                    <ToggleButton.Resources>
+                                                        <Style TargetType="Border">
+                                                            <Setter Property="CornerRadius" Value="5"/>
+                                                        </Style>
+                                                    </ToggleButton.Resources>
+                                                </ToggleButton>
+
+                                                <Popup x:Name="ChangeValuePopUp" IsOpen="{Binding IsChecked, ElementName=ChangeValue}" StaysOpen="False" PlacementTarget="{Binding ElementName=ChangeValue}">
+                                                    <Grid>
+                                                        <Grid.RowDefinitions>
+                                                            <RowDefinition Height="50"/>
+                                                            <RowDefinition Height="50"/>
+                                                        </Grid.RowDefinitions>
+
+                                                        <Grid.ColumnDefinitions>
+                                                            <ColumnDefinition Width="100"/>
+                                                            <ColumnDefinition Width="100"/>
+                                                        </Grid.ColumnDefinitions>
+
+                                                        <Border Grid.ColumnSpan="2" Grid.RowSpan="2" CornerRadius="5" Background="Black" BorderBrush="#e9eecd"/>
+
+
+                                                        <TextBox x:Name="ValueChangerTextBox" Text="{Binding PointsString, Mode=OneWay, UpdateSourceTrigger=Explicit}" Grid.Row="0" Grid.Column="0"/>
+
+                                                        <!--<TextBox x:Name="ValueChanger" Text="{Binding PointsString, Mode=OneWay, UpdateSourceTrigger=Explicit}" Grid.Row="0" Grid.Column="0">
+                                                            <TextBox.Style>
+                                                                <Style TargetType="{x:Type TextBox}">
+                                                                    <Setter Property="SnapsToDevicePixels" Value="True"/>
+                                                                    <Setter Property="OverridesDefaultStyle" Value="True"/>
+                                                                    <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+                                                                    <Setter Property="AllowDrop" Value="true"/>
+                                                                    <Setter Property="Template">
+                                                                        <Setter.Value>
+                                                                            <ControlTemplate TargetType="{x:Type TextBoxBase}">
+                                                                                <Border 
+                                                                          Name="Border"
+                                                                          CornerRadius="2" 
+                                                                          Padding="2"
+                                                                          Background="Black"
+                                                                          BorderBrush="#455450"
+                                                                          BorderThickness="1" >
+                                                                                    <ScrollViewer Margin="0" x:Name="PART_ContentHost"/>
+                                                                                </Border>
+                                                                                <ControlTemplate.Triggers>
+                                                                                    <Trigger Property="IsEnabled" Value="False">
+                                                                                        <Setter TargetName="Border" Property="Background" Value="#e9eecd"/>
+                                                                                        <Setter TargetName="Border" Property="BorderBrush" Value="#e9eecd"/>
+                                                                                        <Setter Property="Foreground" Value="#455450"/>
+                                                                                        <Setter Property="FontWeight" Value="Bold"/>
+                                                                                    </Trigger>
+                                                                                </ControlTemplate.Triggers>
+                                                                            </ControlTemplate>
+                                                                        </Setter.Value>
+                                                                    </Setter>
+                                                                </Style>
+                                                            </TextBox.Style>
+                                                        </TextBox>-->
+
+                                                        <Button Content="Change Here" Grid.Row="1" Grid.ColumnSpan="2" 
+                                                                Command="{Binding Path=DataContext.ChangeSkillValueCommand, RelativeSource={RelativeSource AncestorType=TabControl}}">
+                                                            <Button.CommandParameter>
+                                                                <MultiBinding Converter="{StaticResource changedValueConverter}">
+                                                                    <Binding Path="Index"/>
+                                                                    <Binding Path="Name"/>
+                                                                    <Binding Path="PointsString"/>
+                                                                    <Binding Path="Text" ElementName="ValueChangerTextBox"/>
+                                                                    <Binding Path="Size"/>
+                                                                </MultiBinding>
+                                                            </Button.CommandParameter>
+                                                        </Button>
+                                                    </Grid>
+                                                </Popup>
+                                            </StackPanel>
+                                        </DataTemplate>
+                                    </GridViewColumn.CellTemplate>
+                                </GridViewColumn>
+
+                                <GridViewColumn Header="Index" Width="100">
+                                    <GridViewColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <TextBlock Text="{Binding Index}" HorizontalAlignment="Stretch" VerticalAlignment="Center"/>
+                                        </DataTemplate>
+                                    </GridViewColumn.CellTemplate>
+                                </GridViewColumn>
+                                <GridViewColumn Header="Size" Width="50">
+                                    <GridViewColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <Grid HorizontalAlignment="Center">
+                                                <TextBlock Text="{Binding Size}" HorizontalAlignment="Stretch" VerticalAlignment="Center"/>
+                                            </Grid>
+
+                                        </DataTemplate>
+                                    </GridViewColumn.CellTemplate>
+                                </GridViewColumn>
+                                <GridViewColumn DisplayMemberBinding="{Binding SgdString}" Header="SGD Data" Width="Auto">
+                                    <GridViewColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <TextBlock Text="{Binding SgdString}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                        </DataTemplate>
+                                    </GridViewColumn.CellTemplate>
+                                </GridViewColumn>
+                            </GridView>
+                        </ListView.View>
+                        <ListView.ItemContainerStyle>
+                            <Style TargetType="ListViewItem">
+                                <Setter Property="HorizontalAlignment" Value="Stretch"/>
+                                <Setter Property="BorderBrush" Value="#e9eecd"/>
+                                <Setter Property="Foreground" Value="#e9eecd"/>
+                                <Setter Property="Background" Value="Transparent"/>
+                                <Setter Property="Cursor" Value="Hand"/>
+                                <Style.Triggers>
+                                    <!-- TabItem style for hovered state -->
+                                    <Trigger Property="IsMouseOver" Value="True">
+                                        <Setter Property="Background" Value="#455450"/>
+                                        <Setter Property="Foreground" Value="#e9eecd"/>
+                                    </Trigger>
+                                    <!-- TabItem style for selected state -->
+                                    <Trigger Property="IsSelected" Value="True">
+                                        <Setter Property="Background" Value="#e9eecd"/>
+                                        <Setter Property="Foreground" Value="Black"/>
+                                        <Setter Property="BorderBrush" Value="Transparent"/>
+                                    </Trigger>
+                                </Style.Triggers>
+                            </Style>
+                        </ListView.ItemContainerStyle>
+
+                    </ListView>
+                </TabItem>
+
+                <!-- TabItem 2 -->
+                <TabItem Header="{Binding SelectedLanguage.LegendSkillsLabel}">
+                    <ListView
+                      Name="legendSkillItems" 
                       Margin="10" 
                       Width="Auto" 
                       Background="Black" 
                       Foreground="#e9eecd"
-                      Opacity="0.5"
                       BorderBrush="#e9eecd"
-                      ItemsSource="{Binding SaveFile.Skills}">
+                      ItemsSource="{Binding SaveFile.Skills.LegendSkills}">
                         <ListView.View>
                             <GridView AllowsColumnReorder="true" ColumnHeaderToolTip="Skill Information">
                                 <GridViewColumn DisplayMemberBinding="{Binding Name}" Header="Name" Width="250">
@@ -101,8 +300,11 @@
                         <ListView.ItemContainerStyle>
                             <Style TargetType="ListViewItem">
                                 <Setter Property="HorizontalAlignment" Value="Stretch"/>
+                                <Setter Property="Height" Value="10"/>
+                                <Setter Property="VerticalAlignment" Value="Top"/>
                                 <Style.Triggers>
                                     <Trigger Property="IsMouseOver" Value="True">
+                                        <Setter Property="Background" Value="#e9eecd"/>
                                         <Setter Property="Foreground" Value="Black"/>
                                     </Trigger>
                                     <Trigger Property="IsSelected" Value="True">
@@ -113,24 +315,6 @@
                         </ListView.ItemContainerStyle>
 
                     </ListView>
-                </TabItem>
-
-                <!-- TabItem 2 -->
-                <TabItem Header="{Binding SelectedLanguage.LegendSkillsLabel}">
-                    <!-- Tab 2 Content -->
-                    <Grid Background="Transparent">
-                        <!-- Your content goes here -->
-                        <TextBlock Text="Tab 2 Content" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="#e9eecd"/>
-                    </Grid>
-                </TabItem>
-
-                <!-- TabItem 3 -->
-                <TabItem Header="{Binding SelectedLanguage.SkillPointsLabel}">
-                    <!-- Tab 3 Content -->
-                    <Grid Background="Transparent">
-                        <!-- Your content goes here -->
-                        <TextBlock Text="Tab 3 Content" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="#e9eecd"/>
-                    </Grid>
                 </TabItem>
             </TabControl>
         </GroupBox>

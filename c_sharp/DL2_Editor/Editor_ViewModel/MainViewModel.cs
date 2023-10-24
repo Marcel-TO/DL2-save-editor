@@ -1,12 +1,14 @@
 ﻿namespace Editor_ViewModel
 {
     using Editor_Model.EventArgs;
+    using Editor_Model.Items;
     using Editor_Model.Logic;
     using Editor_ViewModel.Interfaces;
     using Editor_ViewModel.Languages;
     using Editor_ViewModel.Logic;
     using System.Collections.ObjectModel;
     using System.ComponentModel;
+    using System.Text;
     using System.Windows.Input;
 
     public class MainViewModel : INotifyPropertyChanged
@@ -36,6 +38,7 @@
             this.FileAnalizer = new FileAnalizerVM();
             this.FileAnalizer.AnalizedSaveFile += this.OnAnalizedFile;
             this.FileAnalizer.ErrorMessage += this.OnErrorMessage;
+            this.FileAnalizer.ChangedSkillItems += this.OnSkillItemsChanged;
             this.IdSearcher = new IdSearcherVM();
             this.IdSearcher.OnIdSearch += this.OnIdSearch;
             this.IdSearcher.GetIDs();
@@ -249,6 +252,37 @@
             }
         }
 
+        /// <summary>
+        /// Gets the command for changing the value.
+        /// </summary>
+        /// <value>The command which changes the value.</value>
+        public ICommand ChangeSkillValueCommand
+        {
+            get
+            {
+                return new GenericCommand(obj =>
+                {
+                    if (obj is object[])
+                    {
+                        object[] parameters = (object[])obj;
+
+                        if (parameters.Length != 5 && parameters[0] is not int && parameters[1] is not string && parameters[2] is not string && parameters[3] is not string && parameters[4] is not int)
+                        {
+                            return;
+                        }
+
+                        int index = (int)parameters[0];
+                        string name = (string)parameters[1];
+                        string beforeChange = (string)parameters[2];
+                        string afterChange = (string)parameters[3];
+                        int size = (int)parameters[4];
+
+                        this.FileAnalizer.ChangeSkillItems(this.SaveFile, index, name, size, beforeChange, afterChange);
+                    }
+                });
+            }
+        }
+
         public void LoadFile(string filePath)
         {
             this.FileAnalizer.ReadSaveFile(filePath);
@@ -271,6 +305,14 @@
             this.IdData = e.IdData;
             this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(this.IdData)));
 
+        }
+
+        protected void OnSkillItemsChanged(object sender, ChangedItemsEventArgs e)
+        {
+            this.SaveFile = new SaveFile("",new byte[] {}, "",new List<InventoryItem[]>(), new Skills(new SkillIItem[] {}, new SkillIItem[] {}), new UnlockableItems[] {});
+            this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(this.SaveFile)));
+            this.SaveFile = e.Savegame;
+            this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(this.SaveFile)));
         }
 
         private ObservableCollection<ILanguageDisplay> CreateSupportedLanguages()

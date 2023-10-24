@@ -47,6 +47,8 @@ namespace Editor_Model.Logic
 
         public event EventHandler<ReadFileEventArgs> ReadFile;
 
+        public event EventHandler<ChangedItemsEventArgs> ChangedSkillItems;
+
         /// <summary>
         /// Reads the content of the file.
         /// </summary>
@@ -75,16 +77,119 @@ namespace Editor_Model.Logic
         }
 
         /// <summary>
-        /// Represents the method for finding all skills inside the save.
+        /// Represents a method for loading a savefile and preparing all necessary information.
+        /// </summary>
+        /// <param name="filePath">The filepath of the current selected save.</param>
+        /// <param name="data">The data of the current selected save.</param>
+        public void LoadSaveFile(string filePath, byte[] data)
+        {
+            // find all skills.
+            int skillStartIndex = this.FindSequenceIndex(data, 0, startSkills, true);
+            int skillEndIndex = this.FindSequenceIndex(data, 0, endSkills, false);
+            byte[] skillDataRange = this.ExtractByteInRange(data, skillStartIndex, skillEndIndex);
+            string[] baseSkills = this.FindBaseSkillMatches(skillDataRange);
+            string[] legendSkills = this.FindLegendSkillMatches(skillDataRange);
+            Skills skills = this.AnalizeSkillData(skillDataRange, baseSkills, legendSkills, skillStartIndex);
+
+            // find all unlockable items.
+            UnlockableItems[] unlockItems = this.AnalizeUnlockableItemsData(data);
+            UnlockableItems lastItem = unlockItems[unlockItems.Length - 1];
+
+            // the space between the SGD IDs and chunk data.
+            int jumpOffset = lastItem.Index + lastItem.Size + 75;
+
+            // get all items within the inventory.
+            List<InventoryItem[]> items = this.GetAllItems(data, jumpOffset);
+            this.AnalizedSaveFile?.Invoke(this, new AnalizedSaveFileEventArgs(new SaveFile(filePath, data, BitConverter.ToString(data).Replace("-", " "), items, skills, unlockItems)));
+        }
+
+        public void ChangeSkillItems(SaveFile savegame, int index, string name, int size, string currentValue, string userInput)
+        {
+            byte[] newValue = new byte[2];
+
+            bool isValid = int.TryParse(userInput, out int result);
+            if (isValid)
+            {
+                byte[] fullBytes = BitConverter.GetBytes(result);
+                newValue = new byte[] { fullBytes[1], fullBytes[0] };
+            }
+            else
+            {
+                newValue = this.HexToByteArray(userInput.Replace(" ", ""));
+            }
+
+            List<byte> newData = new List<byte>(); 
+            newData.AddRange(savegame.FileData.Take(index + size).ToArray());
+            newData.AddRange(newValue);
+            newData.AddRange(savegame.FileData.Skip(newData.Count - 1).ToArray());
+            savegame.FileData = newData.ToArray();
+            int itemIndex = this.ChangeSkillValue(savegame.Skills, index, name, newValue);
+
+            this.ChangedSkillItems?.Invoke(this, new ChangedItemsEventArgs(savegame, itemIndex));
+
+        }
+
+        private int ChangeSkillValue(Skills skills, int index, string name, byte[] value)
+        {
+            int itemIndex = 0;
+
+            for (int i = 0; i < skills.BaseSkills.Length; i++)
+            {
+                if (skills.BaseSkills[i].Index == index && skills.BaseSkills[i].Name == name)
+                {
+                    skills.BaseSkills[i].Points = value;
+                    itemIndex = i;
+                }
+            }
+
+            for (int i = 0; i < skills.LegendSkills.Length; i++)
+            {
+                if (skills.LegendSkills[i].Index == index && skills.LegendSkills[i].Name == name)
+                {
+                    skills.LegendSkills[i].Points = value;
+                    itemIndex = i;
+                }
+            }
+
+            return itemIndex;
+        }
+
+        /// <summary>
+        /// Represents the method for finding all base skills inside the save.
         /// </summary>
         /// <param name="data">The data of the current save.</param>
         /// <returns>All found skills.</returns>
-        private string[] FindSkillMatches(byte[] data)
+        private string[] FindBaseSkillMatches(byte[] data)
         {
             List<string> matches = new List<string>();
             string stringData = Encoding.UTF8.GetString(data);
             
             string pattern = @"([A-Za-z0-9_]+_skill)";
+            MatchCollection matchCollection = Regex.Matches(stringData, pattern);
+
+            // Iterates through each match.
+            foreach (Match match in matchCollection)
+            {
+                if (match.Success && !match.Value.Contains("LP_"))
+                {
+                    matches.Add(match.Value);
+                }
+            }
+
+            return matches.ToArray();
+        }
+
+        /// <summary>
+        /// Represents the method for finding all legend skills inside the save.
+        /// </summary>
+        /// <param name="data">The data of the current save.</param>
+        /// <returns>All found skills.</returns>
+        private string[] FindLegendSkillMatches(byte[] data)
+        {
+            List<string> matches = new List<string>();
+            string stringData = Encoding.UTF8.GetString(data);
+
+            string pattern = @"(LP_[A-Za-z0-9_]+)";
             MatchCollection matchCollection = Regex.Matches(stringData, pattern);
 
             // Iterates through each match.
@@ -106,43 +211,27 @@ namespace Editor_Model.Logic
         /// <param name="matches">All skills that match the skill pattern.</param>
         /// <param name="startingIndex">The starting index of the needed data.</param>
         /// <returns>All matching skills.</returns>
-        private SkillIItem[] AnalizeSkillData(byte[] data, string[] matches, int startingIndex)
+        private Skills AnalizeSkillData(byte[] data, string[] baseMatches, string[] legendMatches, int startingIndex)
         {
-            List<SkillIItem> skills = new List<SkillIItem>();
+            List<SkillIItem> baseSkills = new List<SkillIItem>();
+            List<SkillIItem> legendSkills = new List<SkillIItem>();
 
-            for (int i = 0; i < matches.Length; i++)
+            for (int i = 0; i < baseMatches.Length; i++)
             {
-                byte[] matchBytes = Encoding.UTF8.GetBytes(matches[i]);
+                byte[] matchBytes = Encoding.UTF8.GetBytes(baseMatches[i]);
                 int index = this.FindSequenceIndex(data, 0, matchBytes, false) + startingIndex; // Due to the startingindex Offset
-                skills.Add(new SkillIItem(matches[i].Replace("\x00", "").TrimEnd('\x01'), index, matchBytes.Length,matchBytes,this.ExtractByteInRange(data, index + matchBytes.Length, index + matchBytes.Length + 2)));
+                // To find the correct index inside the compressed data, the startingindex have to be subtracted from the index inside the extracct byte method.
+                baseSkills.Add(new SkillIItem(baseMatches[i].Replace("\x00", "").TrimEnd('\x01'), index, matchBytes.Length,matchBytes,this.ExtractByteInRange(data, index + matchBytes.Length - startingIndex, index + matchBytes.Length + 2 - startingIndex)));
             }
 
-            return skills.ToArray();
-        }
+            for (int i = 0; i < legendMatches.Length; i++)
+            {
+                byte[] matchBytes = Encoding.UTF8.GetBytes(legendMatches[i]);
+                int index = this.FindSequenceIndex(data, 0, matchBytes, false) + startingIndex; // Due to the startingindex Offset
+                legendSkills.Add(new SkillIItem(legendMatches[i].Replace("\x00", "").TrimEnd('\x01'), index, matchBytes.Length, matchBytes, this.ExtractByteInRange(data, index + matchBytes.Length, index + matchBytes.Length + 2)));
+            }
 
-        /// <summary>
-        /// Represents a method for loading a savefile and preparing all necessary information.
-        /// </summary>
-        /// <param name="filePath">The filepath of the current selected save.</param>
-        /// <param name="data">The data of the current selected save.</param>
-        public void LoadSaveFile(string filePath, byte[] data)
-        {
-            // find all skills.
-            int skillStartIndex = this.FindSequenceIndex(data, 0, startSkills, true);
-            int skillEndIndex = this.FindSequenceIndex(data, 0, endSkills, false);
-            byte[] skillDataRange = this.ExtractByteInRange(data, skillStartIndex, skillEndIndex);
-            SkillIItem[] skills = this.AnalizeSkillData(skillDataRange, this.FindSkillMatches(skillDataRange), skillStartIndex);
-
-            // find all unlockable items.
-            UnlockableItems[] unlockItems = this.AnalizeUnlockableItemsData(data);
-            UnlockableItems lastItem = unlockItems[unlockItems.Length - 1];
-
-            // the space between the SGD IDs and chunk data.
-            int jumpOffset = lastItem.Index + lastItem.Size + 75;
-
-            // get all items within the inventory.
-            List<InventoryItem[]> items = this.GetAllItems(data, jumpOffset);
-            this.AnalizedSaveFile?.Invoke(this, new AnalizedSaveFileEventArgs(new SaveFile(filePath, data, BitConverter.ToString(data).Replace("-", " "), items, skills, unlockItems)));
+            return new Skills(baseSkills.ToArray(), legendSkills.ToArray());
         }
 
         /// <summary>
@@ -663,6 +752,14 @@ namespace Editor_Model.Logic
             }
 
             return compactData;
+        }
+
+        private byte[] HexToByteArray(string hex)
+        {
+            return Enumerable.Range(0, hex.Length)
+                             .Where(x => x % 2 == 0)
+                             .Select(x => Convert.ToByte(hex.Substring(x, 2), 16))
+                             .ToArray();
         }
     }
 }

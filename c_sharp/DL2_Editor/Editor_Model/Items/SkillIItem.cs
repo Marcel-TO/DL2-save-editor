@@ -21,7 +21,7 @@
                 return this._points;
             }
 
-            private set
+            set
             {
                 if (value == null)
                 {
